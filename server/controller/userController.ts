@@ -81,6 +81,25 @@ export default class UserController {
     res.status(200).json({ _id: existingUser.id, name: existingUser.username, token });
   }
 
+  async getUserById(req: Request, res: Response) {
+
+    const userId: number = parseInt(req.params.id);
+
+    const user: User | undefined = await this.userService.getUserByIdAsync(userId);
+
+    if (!user) return res.status(404).json({ msg: "User not found" });
+
+    res.status(200).json(user);
+  }
+
+  async getAllUsers(req: Request, res: Response) {
+    const users: User[] | undefined = await this.userService.getAllUsersAsync();
+
+    if (!users) return res.status(404).json({ msg: "No users found" });
+
+    res.status(200).json(users);
+  }
+
    
   routes() {
     router.post("/register", (req: Request, res: Response) =>
@@ -90,6 +109,13 @@ export default class UserController {
     router.post("/authenticate", (req: Request, res: Response) =>
        this.authenticate(req, res)  
     );
+
+    router.get("/:id", (req: Request, res: Response) =>
+       this.getUserById(req, res)  
+    );
+    router.get("/", (req: Request, res: Response) =>
+    this.getAllUsers(req, res)  
+ );
     return router;
   }
 

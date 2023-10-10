@@ -1,12 +1,25 @@
 import { PostUserDto, User } from "../model/user";
-import "reflect-metadata"
+import "reflect-metadata";
 const pgPoolWrapper = require(".././connection"); // import pgPoolWrapper
-
 
 export class UserRepository {
   constructor() {}
 
-  async getUserByEmailAsync(email: string):  Promise<User | undefined>  {
+  async getAllUsersAsync(): Promise<User[] | undefined> {
+    try {
+      const client = await pgPoolWrapper.connect();
+
+      const result = await client.query("SELECT * FROM chat_app.user ");
+
+      client.release();
+
+      return result.rows.length > 0 ? result.rows : null;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async getUserByEmailAsync(email: string): Promise<User | undefined> {
     // Database query logic to find a user by ID
     try {
       const client = await pgPoolWrapper.connect();
@@ -24,7 +37,24 @@ export class UserRepository {
     }
   }
 
-  async createUserAsync(user: PostUserDto) : Promise<User | undefined>  {
+  async getUserByIdAsync(id: number): Promise<User | undefined> {
+    try {
+      const client = await pgPoolWrapper.connect();
+
+      const result = await client.query(
+        "SELECT * FROM chat_app.user WHERE id = $1 ",
+        [id]
+      );
+
+      client.release();
+
+      return result.rows.length > 0 ? result.rows[0] : null;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async createUserAsync(user: PostUserDto): Promise<User | undefined> {
     try {
       const client = await pgPoolWrapper.connect();
 
@@ -37,6 +67,5 @@ export class UserRepository {
     } catch (error) {
       console.log(error);
     }
-    return undefined;
   }
 }
