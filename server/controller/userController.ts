@@ -1,29 +1,25 @@
 import { User, PostUserDto } from "../model/user";
-import { Request, Response } from "express";
-import { UserService } from "../service/userService";
+import { Request, Response, Router } from "express";
+import { autoInjectable } from "tsyringe";
+import UserService from "../service/userService";
+import JWT from "../helpers/jwt";
 
+const express = require("express");
+const router = express.Router();
 const bcrypt = require("bcrypt");
 const validator = require("validator");
-const jwt = require("jsonwebtoken");
-const pgPoolWrapper = require("../connection"); // import pgPoolWrapper
-const {getUserByEmailAsync} = require("../service/userService"); // import pgPoolWrapper
 
+@autoInjectable()
+export default class UserController {
+  userService: UserService;
 
-const createToken = (_id: number) => {
-  const jwtkey = process.env.JWT_SECRET;
+  constructor(userService: UserService) {
+    this.userService = userService;
+  }
 
-  return jwt.sign({ id: _id }, jwtkey, { expiresIn: "3d" });
-};
+  async registerUser(req: Request, res: Response) {
+    const { username, email, password } = req.body;
 
-export class UserController {
-
-constructor(private readonly userService: UserService) {}
-
-  async registerUser (req: Request, res: Response) {
-  const { username, email, password } = req.body;
-
- 
-    
     // validation of the user input
     if (!username || !email || !password)
       return res.status(400).json({ msg: "Please fill all the fields" });
@@ -33,11 +29,10 @@ constructor(private readonly userService: UserService) {}
       return res.status(400).json({ msg: "Please enter a strong password" });
 
     // checking if the user already exists
-    // return existing user from the database
-    const existingUser = await this.userService.getUserByEmailAsync(email);
+    const existingUser: User | undefined =
+      await this.userService.getUserByEmailAsync(email);
 
-
-    if (existingUser.rows.length > 0)
+    if (existingUser)
       return res.status(400).json({ msg: "User already exists" });
 
     const user: PostUserDto = {
@@ -48,51 +43,55 @@ constructor(private readonly userService: UserService) {}
         .then((salt: any) => bcrypt.hash(password, salt)),
     };
 
-    // inserting the user into the database
+    const newUser: User | undefined = await this.userService.createUserAsync(
+      user
+    );
 
-    const newUser = this.userService.createUserAsync(user);
-    
-    const token = createToken(newUser.rows[0].id);
+    if (!newUser) return res.status(500).json({ msg: "Failed to create user" });
+
+    const token = JWT.createToken(newUser.id);
 
     res.status(200).json({
       token,
       user: {
-        id: newUser.rows[0].id,
-        username: newUser.rows[0].name,
-        email: newUser.rows[0].email,
+        id: newUser.id,
+        username: newUser.username,
+        email: newUser.email,
       },
     });
+  }
 
-  
-};
+  async authenticate(req: Request, res: Response) {
+    const { email, password } = req.body;
 
+    if (!email || !password)
+      return res.status(400).json({ msg: "Please fill all the fields" });
 
-// const authenticate = async (req: Request, res: Response) => {
-//     const {email, password} = req.body;
+    const existingUser: User | undefined = await this.userService.getUserByEmailAsync(email);
 
-//     try {
-//         const client = await pgPoolWrapper.connect();
+    // checking if the user exists
+    if (!existingUser)
+      return res.status(400).json({ msg: "User does not exist" });
 
-//         const existingUser  = await client.query(
-//             "SELECT * FROM chat_app.user WHERE email = $1",
-//             [email]
-//           );
-      
+    const isValidPws = await bcrypt.compare(password, existingUser.password);
+    if (!isValidPws)
+      return res.status(400).json({ msg: "Invalid credentials" });
 
-//         if(existingUser.rows.length === 0) return res.status(400).json({msg: "User does not exist"});
+    const token = JWT.createToken(existingUser.id);
+    res.status(200).json({ _id: existingUser.id, name: existingUser.username, token });
+  }
 
-//         const isValidPws = await bcrypt.compare(password, existingUser.rows[0].password);
-//         if(!isValidPws) return res.status(400).json({msg: "Invalid credentials"});
+   
+  routes() {
+    router.post("/register", (req: Request, res: Response) =>
+       this.registerUser(req, res)  
+    );
 
-//         const token = createToken(existingUser.rows[0].id);
-//         res.status(200).json({ _id : existingUser.rows[0].id,name: existingUser.username ,token});
-//     } catch (err: any) {
+    router.post("/authenticate", (req: Request, res: Response) =>
+       this.authenticate(req, res)  
+    );
+    return router;
+  }
 
-//     }
-
-// }
-
-
-
-
+ 
 }

@@ -1,16 +1,21 @@
-import { UserRepository } from "../repository/interface/userRepository";
-import { UserServiceInterface } from "./interface/userServiceInterface";
+import { autoInjectable } from "tsyringe";
+import { UserRepository } from "../repository/userRepository";
+import { PostUserDto, User } from "../model/user";
 
 
+@autoInjectable()
+export default class UserService {
+    userRepository: UserRepository
 
-export class UserService implements UserServiceInterface{
-    constructor(private readonly userRepository: UserRepository) {}
+    constructor( userRepository: UserRepository) {
+      this.userRepository = userRepository;
+    }
 
-    createUserAsync(user: any) {
+    async createUserAsync(user: PostUserDto) : Promise<User | undefined>   {
         return this.userRepository.createUserAsync(user);
     }
   
-    async getUserByEmailAsync(email: string) {
+    async getUserByEmailAsync(email: string)  : Promise<User | undefined> {
       return this.userRepository.getUserByEmailAsync(email);
     }
   }

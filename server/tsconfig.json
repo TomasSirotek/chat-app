@@ -5,6 +5,9 @@
     "outDir": "./dist",
     "target": "esnext",
     "moduleDetection": "force",
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
     "allowImportingTsExtensions": true,
     "noEmit": true,
     "noImplicitAny": true,
@@ -20,7 +23,10 @@
       "bun-types" // add Bun global
     ]
   },
-  "ts-node": {
-    "esm": true // «———— enabling ESM for ts-node
-  }
+  "include": [
+    "./**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

@@ -1,16 +1,13 @@
-import { Request, Response } from "express"; // import Request and Response types
-import { injectDependencies } from '../middleware/di';
+// import { Request, Response } from "express"; // import Request and Response types
+// import 'reflect-metadata';
+// import { container } from 'tsyringe';
+// import UserController from "../controller/userController";
+// const express = require('express');
 
-const express = require('express');
+// const router = express.Router();
 
-const router = express.Router();
-router.use(injectDependencies);
+// // router.post('/register',container.resolve(UserController).routes())
+// // router.post('/login', authenticate);
+// // router.get('/user', getUserById);
 
-router.post('/register', async (req : any, res: any) => {
-    const { userController } = req;
-    await userController.registerUser(req, res);
-  });
-// router.post('/login', authenticate);
-// router.get('/user', getUserById);
-
-module.exports = router;
+// module.exports = router;
