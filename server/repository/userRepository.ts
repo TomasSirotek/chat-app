@@ -20,7 +20,6 @@ export class UserRepository {
   }
 
   async getUserByEmailAsync(email: string): Promise<User | undefined> {
-    // Database query logic to find a user by ID
     try {
       const client = await pgPoolWrapper.connect();
 
