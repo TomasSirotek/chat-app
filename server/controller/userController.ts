@@ -51,23 +51,31 @@ export default class UserController {
 
     const token = JWT.createToken(newUser.id);
 
-    res.status(200).json({
-      token,
-      user: {
-        id: newUser.id,
-        username: newUser.username,
-        email: newUser.email,
-      },
-    });
+    // For now returning use inside the json response however it has to be changed back later on to the token only ! Propabllyyyy
+    // Same here with the cookie
+    return res
+      .cookie("access_token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+      })
+      .status(200)
+      .json({
+        message: "Registered successfully 😊 👌",
+        _id: newUser.id,
+        name: newUser.username,
+      });
   }
 
   async authenticate(req: Request, res: Response) {
     const { email, password } = req.body;
 
+    console.log(req.body);
+
     if (!email || !password)
       return res.status(400).json({ msg: "Please fill all the fields" });
 
-    const existingUser: User | undefined = await this.userService.getUserByEmailAsync(email);
+    const existingUser: User | undefined =
+      await this.userService.getUserByEmailAsync(email);
 
     // checking if the user exists
     if (!existingUser)
@@ -78,14 +86,27 @@ export default class UserController {
       return res.status(400).json({ msg: "Invalid credentials" });
 
     const token = JWT.createToken(existingUser.id);
-    res.status(200).json({ _id: existingUser.id, name: existingUser.username, token });
+
+    return res
+      .cookie("access_token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+      })
+      .status(200)
+      .json({
+        message: "Loggen in successfully 😊 👌",
+        _id: existingUser.id,
+        name: existingUser.username,
+      });
+
   }
 
   async getUserById(req: Request, res: Response) {
-
     const userId: number = parseInt(req.params.id);
 
-    const user: User | undefined = await this.userService.getUserByIdAsync(userId);
+    const user: User | undefined = await this.userService.getUserByIdAsync(
+      userId
+    );
 
     if (!user) return res.status(404).json({ msg: "User not found" });
 
@@ -100,24 +121,21 @@ export default class UserController {
     res.status(200).json(users);
   }
 
-   
   routes() {
     router.post("/register", (req: Request, res: Response) =>
-       this.registerUser(req, res)  
+      this.registerUser(req, res)
     );
 
     router.post("/authenticate", (req: Request, res: Response) =>
-       this.authenticate(req, res)  
+      this.authenticate(req, res)
     );
 
     router.get("/:id", (req: Request, res: Response) =>
-       this.getUserById(req, res)  
+      this.getUserById(req, res)
     );
     router.get("/", (req: Request, res: Response) =>
-    this.getAllUsers(req, res)  
- );
+      this.getAllUsers(req, res)
+    );
     return router;
   }
-
- 
 }

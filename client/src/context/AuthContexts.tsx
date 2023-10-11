@@ -60,6 +60,7 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
         showAlert(res.msg, "warning"); // Show the error message
         return;
       }
+      showAlert('Succesfully registeref ', "success")
       // TODO: check if this is the correct way to store user in local storage
       localStorage.setItem("user", JSON.stringify(res));
       setUser(res); // stored in local storage
