@@ -1,27 +1,48 @@
 import * as React from "react";
 
-import { cn } from "@/lib/utils";
 import { Button } from "./button";
 import { Label } from "./label";
 import { Input } from "./input";
+import { Loader } from "lucide-react";
 
-interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {}
+import { FormEvent } from "react";
 
-export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
+interface UserAuthFormProps
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, "onSubmit"> {
+  formRef: React.RefObject<HTMLFormElement>;
+  onSubmit: (formData: FormData) => void;
+}
+
+export function UserAuthForm({
+  className,
+  formRef,
+  onSubmit,
+  ...props
+}: UserAuthFormProps) {
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
 
-  async function onSubmit(event: React.SyntheticEvent) {
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
     setIsLoading(true);
+
+    const formData = formRef.current
+      ? new FormData(formRef.current)
+      : undefined;
+
+
+    if (onSubmit && formData) {
+      onSubmit(formData);
+    }
 
     setTimeout(() => {
       setIsLoading(false);
     }, 3000);
-  }
+  };
 
   return (
-    <div className={cn("grid gap-6", className)} {...props}>
-      <form onSubmit={onSubmit}>
+    <div className={className} {...props}>
+      <form onSubmit={handleSubmit} ref={formRef}>
         <div className="grid gap-2">
           <div className="grid gap-1">
             <Label className="sr-only" htmlFor="email">
@@ -29,6 +50,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
             </Label>
             <Input
               id="email"
+              name="email"
               placeholder="name@example.com"
               type="email"
               autoCapitalize="none"
@@ -36,11 +58,12 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
               autoCorrect="off"
               disabled={isLoading}
             />
-             <Label className="sr-only" htmlFor="password">
+            <Label className="sr-only" htmlFor="password">
               Email
             </Label>
             <Input
               id="password"
+              name="password"
               placeholder="********"
               type="password"
               autoCapitalize="none"
@@ -49,10 +72,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
             />
           </div>
           <Button disabled={isLoading}>
-            {isLoading && (
-              //   <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-              <div>test</div>
-            )}
+            {isLoading && <Loader className="mr-2 h-4 w-4 animate-spin" />}
             Sign In with Email
           </Button>
         </div>

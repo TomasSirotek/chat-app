@@ -3,6 +3,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useRef,
   useState,
 } from "react";
 import { User } from "../models/User";
@@ -25,14 +26,13 @@ export const AuthContext = createContext<AuthContextValue | undefined>(
 export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [registerErr, setRegisterErr] = useState<string | null>(null);
-  const [loginErr, setLoginErr] = useState<string | null>(null);
-
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-
   const { showAlert } = useAlert(); // Use the context hook
 
+
+  //TODO: Fix this LATER
   const registerUser = useCallback(
     async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
@@ -58,47 +58,45 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
         showAlert(res.msg, "warning"); // Show the error message
         return;
       }
-      showAlert('Succesfully registered ', "success")
+      showAlert("Succesfully registered ", "success");
 
-      setUser(res); 
+      setUser(res);
     },
     []
   );
 
+  const loginUser = useCallback(async (formData: FormData) => {
+    setRegisterErr(null);
 
-  const loginUser = useCallback(
-    async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-  
-        setIsLoading(true);
-        setRegisterErr(null);
-  
-        const data = new FormData(e.currentTarget);
-  
-        const loginInfo = {
-          email: data.get("email"),
-          password: data.get("password"),
-        };
-  
-        const res = await postRequest(
-          `${environment.BASE_URL}/users/login`,
-          JSON.stringify(loginInfo)
-        );
-  
-        setIsLoading(false);
-  
-        if (res.err) {
-          showAlert(res.msg, "warning"); // Show the error message
-          return;
-        }
-        showAlert(`Succesfully loggen in ${loginInfo.email} `, "success")
-    
-        document.cookie = `token=${res.cookie}`;
-        
-        setUser(res); 
-    },
-    []
-  );
+    const loginInfo = {
+      email: formData.get("email"),
+      password: formData.get("password"),
+    };
+
+    if (!loginInfo.email || !loginInfo.password) {
+      showAlert("Please enter all fields", "warning");
+      return;
+    }
+
+    setIsLoading(true);
+
+    const res = await postRequest(
+      `${environment.BASE_URL}/users/login`,
+      JSON.stringify(loginInfo)
+    );
+
+    setIsLoading(false);
+
+    if (res.err) {
+      showAlert(res.msg, "warning"); // Show the error message
+      return;
+    }
+    showAlert(`Successfully logged in ${loginInfo.email}`, "success");
+
+    document.cookie = `token=${res.cookie}`;
+
+    setUser(res);
+  }, []);
 
   return (
     <AuthContext.Provider
