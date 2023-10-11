@@ -8,13 +8,10 @@ import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { useContext } from "react";
 import { AuthContext } from "../context/AuthContexts";
-import LoadingButton from "@mui/lab/LoadingButton";
 import SaveIcon from "@mui/icons-material/Save";
 
 const Register = () => {
-  const authContext = useContext(AuthContext);
-  const { registerInfo, isLoading } = authContext || {};
-  const registerUser = authContext?.registerUser;
+  const { isLoading, registerUser } = useContext(AuthContext) || {};
 
   return (
     <>
@@ -42,7 +39,7 @@ const Register = () => {
             <Grid container spacing={2}>
               <Grid item xs={12}>
                 <TextField
-                  autoComplete="given-name"
+                  autoComplete="off"
                   name="username"
                   required
                   fullWidth
@@ -58,7 +55,7 @@ const Register = () => {
                   id="email"
                   label="Email Address"
                   name="email"
-                  autoComplete="email"
+                  autoComplete="off"
                 />
               </Grid>
               <Grid item xs={12}>
@@ -73,7 +70,7 @@ const Register = () => {
                 />
               </Grid>
             </Grid>
-            <LoadingButton
+            {/* <LoadingButton
               loading={isLoading}
               loadingPosition="start"
               startIcon={<SaveIcon />}
@@ -83,7 +80,7 @@ const Register = () => {
               sx={{ mt: 3, mb: 2 }}
             >
               {isLoading ? "Registering..." : "Sign Up"}
-            </LoadingButton>
+            </LoadingButton> */}
             <Grid container justifyContent="flex-end">
               <Grid item>
                 <Link href="/login" variant="body2">

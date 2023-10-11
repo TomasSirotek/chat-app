@@ -9,11 +9,12 @@ import { User } from "../models/User";
 import { postRequest } from "../utils/Service";
 import { environment } from "../environments/environment";
 import { useAlert } from "../providers/AlertProvider";
+import { Router } from "react-router-dom";
 
 interface AuthContextValue {
   user: object | null;
   registerUser: (info: any) => void;
-  registerInfo: object;
+  loginUser: (info: any) => void;
   isLoading: boolean;
 }
 
@@ -24,13 +25,11 @@ export const AuthContext = createContext<AuthContextValue | undefined>(
 export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [registerErr, setRegisterErr] = useState<string | null>(null);
+  const [loginErr, setLoginErr] = useState<string | null>(null);
+
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [registerInfo, setRegisterInfo] = useState({
-    username: "",
-    email: "",
-    password: "",
-  });
+
 
   const { showAlert } = useAlert(); // Use the context hook
 
@@ -42,8 +41,7 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
 
       const data = new FormData(e.currentTarget);
 
-      const registerInfo3 = {
-        ...registerInfo,
+      const registerInfoConst = {
         username: data.get("username"),
         email: data.get("email"),
         password: data.get("password"),
@@ -51,7 +49,7 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
 
       const res = await postRequest(
         `${environment.BASE_URL}/users/register`,
-        JSON.stringify(registerInfo3)
+        JSON.stringify(registerInfoConst)
       );
 
       setIsLoading(false);
@@ -60,10 +58,44 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
         showAlert(res.msg, "warning"); // Show the error message
         return;
       }
-      showAlert('Succesfully registeref ', "success")
-      // TODO: check if this is the correct way to store user in local storage
-      localStorage.setItem("user", JSON.stringify(res));
-      setUser(res); // stored in local storage
+      showAlert('Succesfully registered ', "success")
+
+      setUser(res); 
+    },
+    []
+  );
+
+
+  const loginUser = useCallback(
+    async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+  
+        setIsLoading(true);
+        setRegisterErr(null);
+  
+        const data = new FormData(e.currentTarget);
+  
+        const loginInfo = {
+          email: data.get("email"),
+          password: data.get("password"),
+        };
+  
+        const res = await postRequest(
+          `${environment.BASE_URL}/users/login`,
+          JSON.stringify(loginInfo)
+        );
+  
+        setIsLoading(false);
+  
+        if (res.err) {
+          showAlert(res.msg, "warning"); // Show the error message
+          return;
+        }
+        showAlert(`Succesfully loggen in ${loginInfo.email} `, "success")
+    
+        document.cookie = `token=${res.cookie}`;
+        
+        setUser(res); 
     },
     []
   );
@@ -72,9 +104,9 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
     <AuthContext.Provider
       value={{
         user,
-        registerInfo,
         registerUser,
         isLoading,
+        loginUser,
       }}
     >
       {children}

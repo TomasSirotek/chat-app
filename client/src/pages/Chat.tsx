@@ -12,14 +12,52 @@ import {
 import Grid from "@mui/material/Grid";
 import Paper from "@mui/material/Paper";
 import SendIcon from "@mui/icons-material/Send";
-import Container from '@mui/material/Container';
-
+import Container from "@mui/material/Container";
+import { getRequest } from "../utils/Service";
+import { environment } from "../environments/environment";
+import { useState } from "react";
 
 const Chat = () => {
+  const [user, setUser] = useState<any[]>([]);
+
+  const getUser = async () => {
+    const res = await getRequest(`${environment.BASE_URL}/users/login`);
+
+    if (res.err) {
+      console.log(res.msg);
+      return;
+    }
+    setUser(res.data);
+    console.log(res.data);
+  };
+
+  getUser();
+
   return (
     <>
-        <Container component="main" >
-      <Grid
+      <Container component="main">
+        {/* 
+                display all user data 
+            */}
+
+        <Grid
+          container
+          sx={{
+            marginTop: 8,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          {user.map((userData: any, index: number) => (
+            <div key={index}>
+              <h1>{userData.email}</h1>
+              <h1>{userData.username}</h1>
+            </div>
+          ))}
+        </Grid>
+
+        {/* <Grid
         container
         sx={{
           marginTop: 8,
@@ -180,10 +218,9 @@ const Chat = () => {
             </Grid>
           </Grid>
         </Grid>
-      </Grid>
+      </Grid> */}
       </Container>
     </>
-    
   );
 };
 
