@@ -29,7 +29,7 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const { showAlert } = useAlert(); // Use the context hook
+  const { showAlert,hideAlert } = useAlert(); // Use the context hook
 
 
   //TODO: Fix this LATER
@@ -70,7 +70,7 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
 
     const loginInfo = {
       email: formData.get("email"),
-      password: formData.get("password"),
+      password: formData.get("password") || 'React123456!',
     };
 
     if (!loginInfo.email || !loginInfo.password) {
@@ -96,6 +96,13 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
     document.cookie = `token=${res.cookie}`;
 
     setUser(res);
+    
+    setTimeout(() => {
+
+      hideAlert();
+    } , 3000);
+    
+ 
   }, []);
 
   return (

@@ -4,10 +4,10 @@ import SaveIcon from "@mui/icons-material/Save";
 import { getRequest } from "../utils/Service";
 import { environment } from "../environments/environment";
 import Link from "@mui/material/Link";
-import React, {Suspense} from 'react'
-import {useImage} from 'react-image'
+import React, { Suspense } from "react";
+import { useImage } from "react-image";
 import { UserAuthForm } from "@/components/ui/user-auth-form";
-import { ReactSVG } from 'react-svg'
+import { ReactSVG } from "react-svg";
 
 const Login = () => {
   const { isLoading, loginUser } = useContext(AuthContext) || {};
@@ -28,20 +28,17 @@ const Login = () => {
     console.log(res.data);
   };
 
-
-
-const handleFormSubmit = (formData : any) => {
+  const handleFormSubmit = (formData: any) => {
     if (loginUser) {
-        loginUser(formData);
+      loginUser(formData);
     }
-};
+  };
 
   // getUser();
   return (
     <>
       <div>
-  <ReactSVG src="react.svg" />
-
+        <ReactSVG src="react.svg" />
       </div>
       <div className="container min-h-screen relative hidden flex-col items-center justify-center md:grid lg:max-w-none lg:grid-cols-2 lg:px-0">
         <div className="relative hidden h-full flex-col bg-muted p-10 text-white dark:border-r lg:flex">
@@ -82,7 +79,7 @@ const handleFormSubmit = (formData : any) => {
                 Enter your email below to create your account
               </p>
             </div>
-            <UserAuthForm formRef={formRef}  onSubmit={handleFormSubmit} />
+            <UserAuthForm formRef={formRef} onSubmit={handleFormSubmit} />
             <p className="px-8 text-center text-sm text-muted-foreground">
               <Link href="/login" variant="body2">
                 Already have an account? Sign in
