@@ -1,5 +1,4 @@
 import Avatar from "@mui/material/Avatar";
-import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import Link from "@mui/material/Link";
 import Grid from "@mui/material/Grid";
@@ -9,23 +8,13 @@ import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { useContext } from "react";
 import { AuthContext } from "../context/AuthContexts";
-import { FormControl } from "@mui/material";
 import LoadingButton from "@mui/lab/LoadingButton";
 import SaveIcon from "@mui/icons-material/Save";
 
 const Register = () => {
-const authContext = useContext(AuthContext);
-const { registerInfo, updateRegisterInfo, isLoading } = authContext || {};
-const registerUser = authContext?.registerUser;
-
-//   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-//     event.preventDefault();
-//     const data = new FormData(event.currentTarget);
-//     console.log({
-//       email: data.get("email"),
-//       password: data.get("password"),
-//     });
-//   };
+  const authContext = useContext(AuthContext);
+  const { registerInfo, isLoading } = authContext || {};
+  const registerUser = authContext?.registerUser;
 
   return (
     <>
@@ -53,31 +42,17 @@ const registerUser = authContext?.registerUser;
             <Grid container spacing={2}>
               <Grid item xs={12}>
                 <TextField
-                    onChange={(e) =>
-                        updateRegisterInfo &&
-                        updateRegisterInfo({
-                            ...registerInfo,
-                            username: (e.target as HTMLInputElement).value,
-                        })
-                    }
-                    autoComplete="given-name"
-                    name="username"
-                    required
-                    fullWidth
-                    id="firstName"
-                    label="First Name"
-                    autoFocus
+                  autoComplete="given-name"
+                  name="username"
+                  required
+                  fullWidth
+                  id="firstName"
+                  label="First Name"
+                  autoFocus
                 />
               </Grid>
               <Grid item xs={12}>
                 <TextField
-                  onChange={(e) =>
-                    updateRegisterInfo &&
-                    updateRegisterInfo({
-                      ...registerInfo,
-                      email: (e.target as HTMLInputElement).value,
-                    })
-                  }
                   required
                   fullWidth
                   id="email"
@@ -88,13 +63,6 @@ const registerUser = authContext?.registerUser;
               </Grid>
               <Grid item xs={12}>
                 <TextField
-                  onChange={(e) =>
-                    updateRegisterInfo &&
-                    updateRegisterInfo({
-                      ...registerInfo,
-                      password: (e.target as HTMLInputElement).value,
-                    })
-                  }
                   required
                   fullWidth
                   name="password"
