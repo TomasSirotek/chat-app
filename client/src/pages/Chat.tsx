@@ -8,10 +8,10 @@ import { useContext } from "react";
 
 const Chat = () => {
   const { userChats, isUserChatsLoading } = useContext(ChatContext) || {};
-  const { potentialChats } = useContext(ChatContext) || {} ;
+  const { potentialChats, createChat, updateCurrChat } =
+    useContext(ChatContext) || {};
 
   const { user } = useContext(AuthContext) || {};
-
 
   return (
     <>
@@ -22,11 +22,13 @@ const Chat = () => {
             <div className="bg-background">
               <div className="grid lg:grid-cols-5">
                 <Sidebar
-                    isLoading={isUserChatsLoading ?? true}
-                    chats={userChats}
-                    pChats={potentialChats || null}
-                    user={user || null}
-                    className="hidden lg:block"
+                  isLoading={isUserChatsLoading ?? true}
+                  chats={userChats}
+                  updateCurrChat={updateCurrChat}
+                  createChat={createChat}
+                  pChats={potentialChats || null}
+                  user={user || null}
+                  className="hidden lg:block"
                 />
                 <div className="col-span-3 lg:col-span-4 lg:border-l">
                   <div className="h-full px-4 py-6 lg:px-8">

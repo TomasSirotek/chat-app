@@ -5,10 +5,12 @@ import { Chat } from "@/models/Chat";
 import { User } from "@/models/User";
 import { useFetchRecipientUser } from "@/hooks/useFetchRecipient";
 import { Badge } from "./ui/badge";
+import { Button } from "./ui/button";
 
 interface SidebarItemProps extends React.HTMLAttributes<HTMLDivElement> {
   chat: Chat | null;
   user: User | null;
+  updateCurrChat: (chat: Chat) => void | undefined;
 }
 
 function getAbbreviatedDayOfWeek(dateString: Date) {
@@ -19,12 +21,12 @@ function getAbbreviatedDayOfWeek(dateString: Date) {
   return daysOfWeek[dayOfWeek];
 }
 
-export function SideBarItem({ chat, user }: SidebarItemProps) {
+export function SideBarItem({ chat, user,updateCurrChat }: SidebarItemProps) {
   const { recipientUser } = useFetchRecipientUser(chat, user);
 
   return (
     <>
-      <div className="hover:bg-gray-200 hover:rounded-lg flex px-4 py-4 " role="button">
+      <div className="hover:bg-gray-200 hover:rounded-lg flex px-4 py-4 " role="button" onClick={() => updateCurrChat(chat as Chat)}>
         <div className="relative">
           <Avatar className="h-12 w-12">
             <AvatarImage

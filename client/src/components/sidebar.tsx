@@ -40,12 +40,16 @@ interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
   isLoading: boolean;
   user: User | null;
   pChats: User[] | null | undefined;
+  createChat: (firstId: number, secondId: number) => void | undefined;
+  updateCurrChat: (chat: Chat) => void | undefined;
 }
 
 export function Sidebar({
   className,
   chats,
   isLoading,
+  createChat,
+  updateCurrChat,
   user,
   pChats,
 }: SidebarProps) {
@@ -92,7 +96,7 @@ export function Sidebar({
             ) : (
               <div className="space-y-8">
                 {chats?.map((chat, index) => (
-                  <SideBarItem key={index} chat={chat} user={user} />
+                  <SideBarItem key={index} chat={chat} user={user} updateCurrChat={updateCurrChat}/>
                 ))}
               </div>
             )}
@@ -143,7 +147,8 @@ export function Sidebar({
               <Button
                 disabled={selectedUser === undefined}
                 onClick={() => {
-                  setOpen(false);
+                  createChat(user?.id!, selectedUser?.id!);
+                  setOpen(false); 
                 }}
               >
                 Continue
