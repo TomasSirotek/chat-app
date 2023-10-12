@@ -2,6 +2,7 @@ import 'reflect-metadata';
 import { Request, Response } from "express"; // import Request and Response types
 import { container } from 'tsyringe';
 import UserController from "./controller/userController";
+import ChatController from './controller/chatController';
 
 require("dotenv").config(); // use .env file
 const express = require("express");
@@ -17,6 +18,7 @@ app.use(cookieParser());
 
 // ENDPOINTS
 app.use('/api/users', container.resolve(UserController).routes());
+app.use('/api/chats', container.resolve(ChatController).routes());
 
 const PORT = process.env.PORT || 5001;
 
