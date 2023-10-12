@@ -11,9 +11,10 @@ import { postRequest } from "../utils/Service";
 import { environment } from "../environments/environment";
 import { useAlert } from "../providers/AlertProvider";
 import { Router } from "react-router-dom";
+import Cookies from "js-cookie";
 
 interface AuthContextValue {
-  user: object | null;
+  user: User | null;
   registerUser: (info: any) => void;
   loginUser: (info: any) => void;
   isLoading: boolean;
@@ -29,8 +30,7 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const { showAlert,hideAlert } = useAlert(); // Use the context hook
-
+  const { showAlert, hideAlert } = useAlert(); // Use the context hook
 
   //TODO: Fix this LATER
   const registerUser = useCallback(
@@ -70,7 +70,7 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
 
     const loginInfo = {
       email: formData.get("email"),
-      password: formData.get("password") || 'React123456!',
+      password: formData.get("password") || "React123456!",
     };
 
     if (!loginInfo.email || !loginInfo.password) {
@@ -93,16 +93,19 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
     }
     showAlert(`Successfully logged in ${loginInfo.email}`, "success");
 
-    document.cookie = `token=${res.cookie}`;
+    const userData = {
+      id: res._id,
+      username: res.name,
+      email: "res.email",
+      password: "res.password",
+      created_at: "Date.now()",
+    };
 
-    setUser(res);
-    
+    setUser(userData);
+
     setTimeout(() => {
-
       hideAlert();
-    } , 3000);
-    
- 
+    }, 3000);
   }, []);
 
   return (

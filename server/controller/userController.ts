@@ -120,8 +120,7 @@ export default class UserController {
 
     return res
       .cookie(ACCESS_TOKEN, token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
+        httpOnly: false
       })
       .status(StatusCodes.OK)
       .json({

@@ -1,9 +1,10 @@
 import { cn } from "@/lib/utils";
 import { Button } from "./ui/button";
 import { ScrollArea } from "./ui/scroll-area";
+import { Chat } from "@/models/Chat";
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
-  chats: any[];
+  chats: Chat[] | null | undefined
 }
 
 export function Sidebar({ className, chats }: SidebarProps) {
@@ -15,6 +16,7 @@ export function Sidebar({ className, chats }: SidebarProps) {
             Chats
           </h2>
           <div className="space-y-1">
+            
            {/* SPACE FOR CHATS */}
           </div>
         </div>

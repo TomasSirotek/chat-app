@@ -8,6 +8,7 @@ import React, { Suspense } from "react";
 import { useImage } from "react-image";
 import { UserAuthForm } from "@/components/ui/user-auth-form";
 import { ReactSVG } from "react-svg";
+import { Button } from "@/components/ui/button";
 
 const Login = () => {
   const { isLoading, loginUser } = useContext(AuthContext) || {};
@@ -33,8 +34,6 @@ const Login = () => {
       loginUser(formData);
     }
   };
-
-  // getUser();
   return (
     <>
       <div>

@@ -1,78 +1,63 @@
+import Cookies from "js-cookie";
+
+const ACCESS_TOKEN = "access_token";
 
 export const postRequest = async (url: string, body: any) => {
-    const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json'
-        },
-        credentials: 'same-origin',
-        body
-    });
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "*/*",
+    },
+    credentials: "include",
+    body,
+  });
 
-    
-    for(let entry of response.headers.entries()) {
-        console.log('header', entry);
-      }
+  const data = await response.json();
 
-    const data = await response.json();
+  if (!response.ok) {
+    let msg: string;
 
-    if(!response.ok) {
-        let msg : string;
-
-        if(data?.msg){
-            msg = data.msg
-        }else {
-            msg = data;
-        }
-
-        return { err : true, msg};
+    if (data?.msg) {
+      msg = data.msg;
+    } else {
+      msg = data;
     }
 
-    
-    console.log("Response header" + response.headers.get('Set-Cookie'))
-
-    console.log("from data => " + JSON.stringify(data))
-
-    console.log("response header" + JSON.stringify(response))
-      // Check if the response includes a "Set-Cookie" header
-   
-    const setCookieHeader = response.headers.get('Set-Cookie');
-    console.log(setCookieHeader)
-    if (setCookieHeader) {
-        console.log(setCookieHeader)
-    // Store the cookie in the browser's cookies, local storage, or session storage
-    document.cookie = setCookieHeader; // or localStorage or sessionStorage
+    return { err: true, msg };
   }
 
-    return data;
-}
+  return data;
+};
 
 export const getRequest = async (url: string) => {
-    const cookie = document.cookie; // get the cookie from the browser
-    
-    const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': '*/*',
-            'Cookie': cookie 
-        },
-    });
+  const cookie = Cookies.get(ACCESS_TOKEN);
 
-    const data = await response.json();
+  if (!cookie) return { err: true, msg: "No cookie found" };
 
-    if(!response.ok) {
-        let msg : string;
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "*/*",
+      Cookie: cookie,
+    },
+    credentials: "include",
+  });
 
-        if(data?.msg){
-            msg = data.msg
-        }else {
-            msg = data;
-        }
+  const data = await response.json();
 
-        return { err : true, msg};
+  if (!response.ok) {
+    let msg: string;
+
+    if (data?.msg) {
+      msg = data.msg;
+    } else {
+      msg = data;
     }
 
-    return data;
-}
+    return { err: true, msg };
+  }
+
+  return data;
+};

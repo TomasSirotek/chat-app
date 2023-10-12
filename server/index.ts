@@ -10,10 +10,15 @@ const cors = require("cors"); // standard CORS
 const app = express();
 const cookieParser = require("cookie-parser");
 
+const corsOptions = {
+  origin: 'http://localhost:5173',
+  credentials: true,
+};
+
 // middleware function
 app.use(express.json()); // recieve json data from client
-app.use(cors()); // use cors
-app.use(cookieParser());
+app.use(cors(corsOptions)); // use cors
+app.use(cookieParser()); 
 
 
 // ENDPOINTS
