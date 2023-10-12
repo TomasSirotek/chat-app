@@ -24,8 +24,8 @@ export default class ChatService {
     return this.chatRepository.getChatOfUsersAsync(firstId, secondId);
   }
 
-  async getChatByUserId(userId: number): Promise<Chat | undefined> {
-    return this.chatRepository.getChatByUserId(userId);
+  async getChatByUserId(userId: number): Promise<Chat[] | []> {
+    return this.chatRepository.getChatsByUserId(userId);
   }
 
   async createChatAsync(chat: PostChatDto): Promise<Chat | undefined> {

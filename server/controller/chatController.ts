@@ -2,7 +2,7 @@ import express, {  Request, Response } from "express";
 import { autoInjectable } from "tsyringe";
 import ChatService from "../service/chatService";
 import { StatusCodes } from "http-status-codes";
-import { PostChatDto } from "../model/chat";
+import { Chat, PostChatDto } from "../model/chat";
 import { authorization } from "./userController";
 
 const router = express.Router();
@@ -49,12 +49,14 @@ export default class ChatController {
     if (!userId)
       return res.status(StatusCodes.BAD_REQUEST).send("The userId is required");
 
-    const existingChat = await this.chatService.getChatByUserId(userId);
+    const existingChat: Chat[] | [] = await this.chatService.getChatByUserId(userId);
 
     if (!existingChat) return res.status(StatusCodes.OK).json("No chat found");
 
     return res.status(StatusCodes.OK).json(existingChat);
   }
+
+  
 
   async getChatOfUsers(req: Request, res: Response) {
     const firstId: number = parseInt(req.params.firstId);

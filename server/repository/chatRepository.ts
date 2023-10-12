@@ -8,41 +8,43 @@ export class ChatRepository {
   
   constructor() {}
 
-  async getChatByUsersAsync(
-    firstId: number,
-    secondId: number
-  ): Promise<Chat | undefined> {
+  async getChatByUsersAsync(firstId: number, secondId: number): Promise<Chat | undefined> {
     try {
       const client = await pgPoolWrapper.connect();
-
-      
+  
       const result = await client.query(
-        'SELECT c.id AS chat_id, c.created_at, c.updated_at, uc.user_id AS member_id ' +
+        'SELECT c.id AS chat_id, c.created_at, c.updated_at, ARRAY_AGG(uc.user_id) AS members ' +
         'FROM chat_app.chat AS c ' +
         'INNER JOIN chat_app.user_chat AS uc ON c.id = uc.chat_id ' +
         'WHERE uc.user_id IN ($1, $2) ' +
-        'GROUP BY c.id, c.created_at, c.updated_at, uc.user_id ',
+        'GROUP BY c.id, c.created_at, c.updated_at ' +
+        'HAVING COUNT(DISTINCT uc.user_id) = 2',
         [firstId, secondId]
       );
-
+  
       client.release();
-
+  
       if (result.rows.length === 0) {
         return undefined; // No chat found for these users
       }
   
-    
-    const chatInfo : Chat= {
-      id: result.rows[0].chat_id,
-      created_at: result.rows[0].created_at,
-      updated_at: result.rows[0].updated_at,
-      members: result.rows.map((row: { member_id: any; }) => row.member_id)
-    };
-    return chatInfo;
+      // Extract chat information
+      const chatInfo: Chat = {
+        id: result.rows[0].chat_id,
+        created_at: result.rows[0].created_at,
+        updated_at: result.rows[0].updated_at,
+        members: result.rows[0].members
+      };
+  
+      return chatInfo;
     } catch (error) {
       console.log(error);
     }
   }
+  
+
+  
+  
 
   async getChatOfUsersAsync(firstId: number, secondId: number): Promise<Chat | undefined> {
     try {
@@ -75,44 +77,62 @@ export class ChatRepository {
       console.log(error);
     }
   }
+
   
-  async getChatByUserId(userId: number): Promise<Chat | undefined> {
+  async getChatsByUserId(userId: number): Promise<Chat[] | []> {
     try {
       const client = await pgPoolWrapper.connect();
   
-      const chatResult = await client.query(
-        'SELECT c.id AS chat_id, c.created_at, c.updated_at ' +
-        'FROM chat_app.chat AS c ' +
-        'INNER JOIN chat_app.user_chat AS uc ON c.id = uc.chat_id ' +
-        'WHERE uc.user_id = $1',
+
+      const result = await client.query(
+        'SELECT ' +
+          'c.id AS chat_id, ' +
+          'c.created_at, ' +
+          'c.updated_at, ' +
+          'ARRAY_AGG(uc.user_id) AS members ' +
+        'FROM ' +
+          'chat_app.chat AS c ' +
+        'JOIN ' +
+          'chat_app.user_chat AS uc ' +
+        'ON ' +
+          'c.id = uc.chat_id ' +
+        'WHERE ' +
+          'c.id IN (' +
+            'SELECT ' +
+              'chat_id ' +
+            'FROM ' +
+              'chat_app.user_chat ' +
+            'WHERE ' +
+              'user_id = $1' +
+          ') ' +
+        'GROUP BY ' +
+          'c.id, c.created_at, c.updated_at',
         [userId]
       );
   
-      if (chatResult.rows.length === 0) return undefined; // No chat found for this user
-  
-      const chatInfo = {
-        id: chatResult.rows[0].chat_id,
-        created_at: chatResult.rows[0].created_at,
-        updated_at: chatResult.rows[0].updated_at,
-        members: []
-      };
-  
-      // Fetch chat members
-      const memberResult = await client.query(
-        'SELECT user_id ' +
-        'FROM chat_app.user_chat ' +
-        'WHERE chat_id = $1',
-        [chatInfo.id]
-      );
   
       client.release();
   
-      // Add members to the chatInfo object
-      chatInfo.members = memberResult.rows.map((row: { user_id: any; }) => row.user_id);
+      if (result.rows.length === 0) return []; // No chats found for this user
   
-      return chatInfo;
+      const chats = result.rows.map((row: { chat_id: any; created_at: any; updated_at: any; members: number[] }) => ({
+        id: row.chat_id,
+        created_at: row.created_at,
+        updated_at: row.updated_at,
+        members: row.members
+      }));
+
+      console.log(result.rows.map((row: { chat_id: any; created_at: any; updated_at: any; members: any; }) => ({
+        id: row.chat_id,
+        created_at: row.created_at,
+        updated_at: row.updated_at,
+        members: row.members
+      })));
+  
+      return chats;
     } catch (error) {
       console.log(error);
+      return [];
     }
   }
   
