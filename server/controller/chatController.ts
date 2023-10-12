@@ -30,17 +30,17 @@ export default class ChatController {
 
     if (existingChat) return res.status(StatusCodes.OK).json(existingChat);
 
-    // const newChatModel: PostChatDto = {
-    //   members: [firstId, secondId],
-    // };
-    // const newChat = await this.chatService.createChatAsync(newChatModel);
+    const newChatModel: PostChatDto = {
+      members: [firstId, secondId],
+    };
+    const newChat = await this.chatService.createChatAsync(newChatModel);
 
-    // if (!newChat)
-    //   return res
-    //     .status(StatusCodes.INTERNAL_SERVER_ERROR)
-    //     .json("Error creating chat");
+    if (!newChat)
+      return res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json("Error creating chat");
 
-    // return res.status(StatusCodes.OK).json(newChat);
+    return res.status(StatusCodes.OK).json(newChat);
   }
 
   async getUserChat(req: Request, res: Response) {
@@ -67,6 +67,7 @@ export default class ChatController {
       firstId,
       secondId
     );
+
 
     if (!existingChat) return res.status(StatusCodes.OK).json("No chat found");
 
