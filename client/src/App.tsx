@@ -12,7 +12,6 @@ function App() {
   const authContext = useContext(AuthContext);
   const user = authContext?.user || null;
 
-  console.log("user", user)
 
  
     return (

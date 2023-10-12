@@ -69,7 +69,7 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
     setRegisterErr(null);
 
     const loginInfo = {
-      email: formData.get("email"),
+      email: formData.get("email") || 'user@gmail.com',
       password: formData.get("password") || "React123456!",
     };
 
