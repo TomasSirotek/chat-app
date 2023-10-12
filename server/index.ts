@@ -2,6 +2,7 @@ import 'reflect-metadata';
 import { Request, Response } from "express"; // import Request and Response types
 import { container } from 'tsyringe';
 import UserController from "./controller/userController";
+import ChatController from './controller/chatController';
 
 require("dotenv").config(); // use .env file
 const express = require("express");
@@ -9,14 +10,20 @@ const cors = require("cors"); // standard CORS
 const app = express();
 const cookieParser = require("cookie-parser");
 
+const corsOptions = {
+  origin: 'http://localhost:5173',
+  credentials: true,
+};
+
 // middleware function
 app.use(express.json()); // recieve json data from client
-app.use(cors()); // use cors
-app.use(cookieParser());
+app.use(cors(corsOptions)); // use cors
+app.use(cookieParser()); 
 
 
 // ENDPOINTS
 app.use('/api/users', container.resolve(UserController).routes());
+app.use('/api/chats', container.resolve(ChatController).routes());
 
 const PORT = process.env.PORT || 5001;
 

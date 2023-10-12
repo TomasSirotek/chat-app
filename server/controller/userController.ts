@@ -18,7 +18,7 @@ const validator = require("validator");
 
 const ACCESS_TOKEN = 'access_token';
 
-const authorization = (req: any, res: Response, next: NextFunction) => {
+export const authorization = (req: any, res: Response, next: NextFunction) => {
   const token = req.cookies.access_token;
 
   if (!token) {
@@ -120,8 +120,7 @@ export default class UserController {
 
     return res
       .cookie(ACCESS_TOKEN, token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
+        httpOnly: false
       })
       .status(StatusCodes.OK)
       .json({
@@ -134,7 +133,7 @@ export default class UserController {
   async logout(req: Request, res: Response) {
     return res
       .clearCookie(ACCESS_TOKEN)
-      .status(200)
+      .status(StatusCodes.OK)
       .json({ message: "Successfully logged out." });
   }
 
