@@ -21,7 +21,7 @@ export function Menu() {
   return (
     <Menubar className="rounded-none border-b border-none flex h-12 items-center justify-between px-4">
       <MenubarMenu>
-        <MenubarTrigger className="font-bold text-black dark:text-white text-md">
+        <MenubarTrigger className="font-bold text-black dark:text-white text-xl">
           ChatApp
         </MenubarTrigger>
         <MenubarContent>

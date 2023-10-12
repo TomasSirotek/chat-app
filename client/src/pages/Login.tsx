@@ -26,7 +26,6 @@ const Login = () => {
       return;
     }
     setUser(res.data);
-    console.log(res.data);
   };
 
   const handleFormSubmit = (formData: any) => {

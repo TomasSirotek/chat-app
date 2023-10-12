@@ -7,6 +7,7 @@ export interface Chat {
 
 
   export interface Member {
+    id: number;
     firstId: number;
     secondId: number;
   }
