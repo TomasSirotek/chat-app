@@ -4,6 +4,7 @@ import ChatService from "../service/chatService";
 import { StatusCodes } from "http-status-codes";
 import { Chat, PostChatDto } from "../model/chat";
 import { authorization } from "./userController";
+import { User } from "../model/user";
 
 const router = express.Router();
 
@@ -56,7 +57,7 @@ export default class ChatController {
     return res.status(StatusCodes.OK).json(existingChat);
   }
 
-  
+
 
   async getChatOfUsers(req: Request, res: Response) {
     const firstId: number = parseInt(req.params.firstId);
@@ -76,6 +77,26 @@ export default class ChatController {
     return res.status(StatusCodes.OK).json(existingChat);
   }
 
+  async getRecipients(req: Request, res: Response) {
+
+    const chatIds = req.params.chatId.split(",").map(Number);
+
+    console.log("recipients in controller =>>>", chatIds);
+
+
+    if (!chatIds)
+      return res.status(StatusCodes.BAD_REQUEST).send("The chatIds is required");
+
+    const existingUsers = await this.chatService.getRecipientsAsync(
+        chatIds
+        );
+
+    if (!existingUsers) return res.status(StatusCodes.OK).json("No chat found");
+
+    console.log("existingUsers =>>>", existingUsers)
+    return res.status(StatusCodes.OK).json(existingUsers);
+  }
+
   routes() {
     router.post("/", authorization, (req: Request, res: Response) =>
       this.createChat(req, res)
@@ -83,6 +104,10 @@ export default class ChatController {
 
     router.get("/:userId", authorization, (req: Request, res: Response) =>
       this.getUserChat(req, res)
+    );
+
+    router.get("/recipient-users/:chatId", authorization, (req: Request, res: Response) =>
+      this.getRecipients(req, res)
     );
 
     router.get(

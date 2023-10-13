@@ -1,15 +1,21 @@
 import { CardsChat } from "@/components/card-chat";
 import { Menu } from "@/components/menu";
 import { Sidebar } from "@/components/sidebar";
-import { Button } from "@/components/ui/button";
 import { AuthContext } from "@/context/AuthContexts";
 import { ChatContext } from "@/context/ChatContext";
 import { useContext } from "react";
 
 const Chat = () => {
-  const { userChats, isUserChatsLoading } = useContext(ChatContext) || {};
-  const { potentialChats, createChat, updateCurrChat } =
-    useContext(ChatContext) || {};
+  const {
+    userChats,
+    isUserChatsLoading,
+    currChat,
+    potentialChats,
+    createChat,
+    createMessage,
+    updateCurrChat,
+    isMsgSending,
+  } = useContext(ChatContext) || {};
 
   const { user } = useContext(AuthContext) || {};
 
@@ -32,7 +38,17 @@ const Chat = () => {
                 />
                 <div className="col-span-3 lg:col-span-4 lg:border-l">
                   <div className="h-full px-4 py-6 lg:px-8">
-                    <CardsChat />
+                    {currChat ? (
+                      <CardsChat 
+                       currentChat={currChat}
+                       isMessageSending={isMsgSending || true}
+                       createMessage={createMessage} />
+                    ) : (
+                      // TODO: Fix this so that there is displayed the last chat that has been opened
+                      <div className="flex justify-center items-center h-full">
+                        <span>Nothing selected for now </span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

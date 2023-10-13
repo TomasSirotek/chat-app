@@ -7,11 +7,7 @@ import { ChatContext } from "@/context/ChatContext";
 import { useContext } from "react";
 
 const PotentialChats = () => {
-  const { potentialChats } = useContext(ChatContext) || {};
-  const { user } = useContext(AuthContext) || {};
-
-  console.log("userChats =>>>>", potentialChats);
-
+  
   return (
     <>
 

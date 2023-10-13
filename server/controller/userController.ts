@@ -163,7 +163,7 @@ export default class UserController {
     );
     router.post("/login", (req: Request, res: Response) =>
       this.login(req, res)
-    );
+    ); 
     router.get("/logout", authorization, (req: Request, res: Response) =>
       this.logout(req, res)
     );

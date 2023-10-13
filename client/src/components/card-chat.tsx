@@ -1,15 +1,45 @@
-import * as React from "react"
-import { CheckIcon, PaperPlaneIcon, PlusIcon } from "@radix-ui/react-icons"
+import * as React from "react";
+import { CheckIcon, PaperPlaneIcon, PlusIcon } from "@radix-ui/react-icons";
 
-import { cn } from "@/lib/utils"
-import { Card, CardContent, CardFooter, CardHeader } from "./ui/card"
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip"
-import { Button } from "./ui/button"
-import { Input } from "./ui/input"
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "./ui/command"
+import { cn } from "@/lib/utils";
+import { Card, CardContent, CardFooter, CardHeader } from "./ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "./ui/tooltip";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "./ui/dialog";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "./ui/command";
+import { Chat } from "@/models/Chat";
+import { useFetchRecipientUser } from "@/hooks/useFetchRecipient";
+import { AuthContext } from "@/context/AuthContexts";
+import { useContext } from "react";
+import { Message } from "@/models/Message";
+import { CheckCircle2 } from "lucide-react";
+import { getAbbreviatedTimeFromTheDate } from "@/helpers/dateHelper";
+import { ChatContext } from "@/context/ChatContext";
+import { SkeletonMsg } from "./empty-msg-skeleton";
 
+// Todo: Fix this so that it is not hardcoded and user can add to group chats
+// however this has to have another db table and also more logic in the backend as well as the front end
 const users = [
   {
     name: "Olivia Martin",
@@ -36,34 +66,21 @@ const users = [
     email: "will@email.com",
     avatar: "/avatars/04.png",
   },
-] as const
+] as const;
 
-type User = (typeof users)[number]
+type User = (typeof users)[number];
 
-export function CardsChat() {
-  const [open, setOpen] = React.useState(false)
-  const [selectedUsers, setSelectedUsers] = React.useState<User[]>([])
+export function CardsChat({ currentChat,createMessage,isMessageSending }: { currentChat: Chat,createMessage: any,isMessageSending: boolean }) {
+  const [open, setOpen] = React.useState(false);
+  const [selectedUsers, setSelectedUsers] = React.useState<User[]>([]);
 
-  const [messages, setMessages] = React.useState([
-    {
-      role: "agent",
-      content: "Hi, how can I help you today?",
-    },
-    {
-      role: "user",
-      content: "Hey, I'm having trouble with my account.",
-    },
-    {
-      role: "agent",
-      content: "What seems to be the problem?",
-    },
-    {
-      role: "user",
-      content: "I can't log in.",
-    },
-  ])
-  const [input, setInput] = React.useState("")
-  const inputLength = input.trim().length
+  const { user } = useContext(AuthContext) || {};
+  // const { recipientUser } = useFetchRecipientUser(currentChat, user ?? null);
+
+  const { isMessagesLoading, messages } = useContext(ChatContext) || {};
+
+  const [input, setInput] = React.useState("");
+  const inputLength = input.trim().length;
 
   return (
     <>
@@ -75,8 +92,12 @@ export function CardsChat() {
               <AvatarFallback>OM</AvatarFallback>
             </Avatar>
             <div>
-              <p className="text-sm font-medium leading-none">Sofia Davis</p>
-              <p className="text-sm text-muted-foreground">m@example.com</p>
+              <p className="text-sm font-medium leading-none">
+                {/* {recipientUser?.username} */}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {/* {recipientUser?.email} */}
+              </p>
             </div>
           </div>
           <TooltipProvider delayDuration={0}>
@@ -98,34 +119,57 @@ export function CardsChat() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {messages.map((message, index) => (
-              <div
-                key={index}
-                className={cn(
-                  "flex w-max max-w-[75%] flex-col gap-2 rounded-lg px-3 py-2 text-sm",
-                  message.role === "user"
-                    ? "ml-auto bg-primary text-primary-foreground"
-                    : "bg-muted"
-                )}
-              >
-                {message.content}
-              </div>
-            ))}
+            {isMessagesLoading ? (
+              <SkeletonMsg />
+            ) : (
+              messages?.map((message, index) => (
+                <div
+                  key={index}
+                  className={cn(
+                    "flex w-max max-w-[75%] flex-col gap-2 rounded-lg px-3 py-2 text-sm",
+                    message.sender_id === user?.id
+                      ? "ml-auto bg-primary text-primary-foreground"
+                      : "bg-muted"
+                  )}
+                >
+                  {message.body}
+                  <div className="flex justify-end relative items-center">
+                    <span className="relative z-10 text-sm">
+                      {message?.created_at &&
+                        getAbbreviatedTimeFromTheDate(
+                          new Date(message.created_at)
+                        )}
+                    </span>
+                    { isMessageSending ?
+                    <div className="flex">
+                    <CheckCircle2
+                      size={15}
+                      className="relative z-0"
+                      strokeWidth={1.5}
+                    />
+                    <CheckCircle2
+                      size={15}
+                      className="relative z-0 -ml-1"
+                      strokeWidth={1.5}
+                     /> 
+                     </div>
+                     :
+                      <span>Sending ...</span>
+                    }
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </CardContent>
+
         <CardFooter>
           <form
             onSubmit={(event) => {
-              event.preventDefault()
-              if (inputLength === 0) return
-              setMessages([
-                ...messages,
-                {
-                  role: "user",
-                  content: input,
-                },
-              ])
-              setInput("")
+              event.preventDefault();
+              if (inputLength === 0) return;
+              createMessage(currentChat.id, user?.id, input);
+              setInput("");
             }}
             className="flex w-full items-center space-x-2"
           >
@@ -144,6 +188,7 @@ export function CardsChat() {
           </form>
         </CardFooter>
       </Card>
+
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="gap-0 p-0 outline-none">
           <DialogHeader className="px-4 pb-4 pt-5">
@@ -168,14 +213,14 @@ export function CardsChat() {
                           selectedUsers.filter(
                             (selectedUser) => selectedUser !== user
                           )
-                        )
+                        );
                       }
 
                       return setSelectedUsers(
                         [...users].filter((u) =>
                           [...selectedUsers, user].includes(u)
                         )
-                      )
+                      );
                     }}
                   >
                     <Avatar>
@@ -219,7 +264,7 @@ export function CardsChat() {
             <Button
               disabled={selectedUsers.length < 2}
               onClick={() => {
-                setOpen(false)
+                setOpen(false);
               }}
             >
               Continue
@@ -228,5 +273,5 @@ export function CardsChat() {
         </DialogContent>
       </Dialog>
     </>
-  )
+  );
 }

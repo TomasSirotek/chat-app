@@ -5,7 +5,7 @@ import { SkeletonDemo } from "./skeletonEmpty";
 import { User } from "@/models/User";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 
-import { useFetchRecipientUser } from "@/hooks/useFetchRecipient";
+import { useFetchRecipientUser, useFetchRecipientUsers } from "@/hooks/useFetchRecipient";
 import { Separator } from "./ui/separator";
 import {
   Tooltip,
@@ -54,6 +54,9 @@ export function Sidebar({
   pChats,
 }: SidebarProps) {
   const [selectedUser, setSelectedUser] = useState<User>();
+  // here i need to provide single chat and user
+  // but it is still fetching only 
+  const recipientUsers  = useFetchRecipientUsers(chats as Chat[], user as User);
 
   const [open, setOpen] = useState(false);
 
@@ -96,13 +99,12 @@ export function Sidebar({
             ) : (
               <div className="space-y-8">
                 {chats?.map((chat, index) => (
-                  <SideBarItem key={index} chat={chat} user={user} updateCurrChat={updateCurrChat}/>
+                  <SideBarItem  recipientUser={recipientUsers && recipientUsers[index] || null} key={index} chat={chat} updateCurrChat={updateCurrChat}/>
                 ))}
               </div>
             )}
           </div>
         </div>
-
         <Dialog open={open} onOpenChange={handleOpen}>
           <DialogContent className="gap-0 p-0 outline-none">
             <DialogHeader className="px-4 pb-4 pt-5">

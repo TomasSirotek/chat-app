@@ -1,29 +1,25 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import { AvatarImage } from "@radix-ui/react-avatar";
 import { Chat } from "@/models/Chat";
 import { User } from "@/models/User";
 import { useFetchRecipientUser } from "@/hooks/useFetchRecipient";
-import { Badge } from "./ui/badge";
-import { Button } from "./ui/button";
+import { getAbbreviatedDayOfWeek } from "@/helpers/dateHelper";
+import { ChatContext } from "@/context/ChatContext";
 
 interface SidebarItemProps extends React.HTMLAttributes<HTMLDivElement> {
   chat: Chat | null;
-  user: User | null;
   updateCurrChat: (chat: Chat) => void | undefined;
+  recipientUser: User | null;
 }
 
-function getAbbreviatedDayOfWeek(dateString: Date) {
-  const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  const date = new Date(dateString);
-  const dayOfWeek = date.getDay(); // 0 for Sunday, 1 for Monday, ...
+export function SideBarItem({ chat,updateCurrChat,recipientUser }: SidebarItemProps) {
+ 
 
-  return daysOfWeek[dayOfWeek];
-}
-
-export function SideBarItem({ chat, user,updateCurrChat }: SidebarItemProps) {
-  const { recipientUser } = useFetchRecipientUser(chat, user);
-
+  // THIS IS CAUSING OPENING THE CONNECTION FOR ALL OF THE CHATS AND ALL THE TIME IT IS OPEN
+  // THEN IM GETTING TIMEOUT FROM THE SERVER AND IT IS NOT WORKING AS INTENDED 
+  // THEREFORE THIS HAS TO BE FIXED SO THAT I ONLY FETCH ALL THE RECIPIENTS ONCE ONCE THE PAGE LOADS AND THEN I CAN USE IT
+  
   return (
     <>
       <div className="hover:bg-gray-200 hover:rounded-lg flex px-4 py-4 " role="button" onClick={() => updateCurrChat(chat as Chat)}>
@@ -42,8 +38,9 @@ export function SideBarItem({ chat, user,updateCurrChat }: SidebarItemProps) {
           <p className="text-sm text-black dark:text-white font-medium">
             {recipientUser?.username}
           </p>
+          {/* HERE IT HAS TO HAVE LATER ON THE PAST MESSAGES FROM THE CHAT */}
           <p className="text-sm text-muted-foreground text-gray-400">
-            Look we have not...
+            {recipientUser?.email}
           </p>
         </div>
         <div className="ml-auto text-sm flex flex-col">
@@ -52,7 +49,8 @@ export function SideBarItem({ chat, user,updateCurrChat }: SidebarItemProps) {
               getAbbreviatedDayOfWeek(new Date(chat.updated_at))}
           </span>
           <span>
-            <Badge variant="destructive">2</Badge>
+            {/* BRING BACK ONCE THIS IS NEEDED */}
+            {/* <Badge variant="destructive">2</Badge> */}
           </span>
         </div>
       </div>
