@@ -18,7 +18,11 @@ export class MessageModel implements Message{
         this.senderId = senderId;
         this.body = body;
         this.created_at = created_at;
-    }
+    } 
+}
 
-    
+export interface PostMessageDto {
+    chatId : number,
+    senderId: number,
+    body: string
 }

@@ -52,7 +52,8 @@ export function SideBarItem({ chat, user,updateCurrChat }: SidebarItemProps) {
               getAbbreviatedDayOfWeek(new Date(chat.updated_at))}
           </span>
           <span>
-            <Badge variant="destructive">2</Badge>
+            {/* BRING BACK ONCE THIS IS NEEDED */}
+            {/* <Badge variant="destructive">2</Badge> */}
           </span>
         </div>
       </div>

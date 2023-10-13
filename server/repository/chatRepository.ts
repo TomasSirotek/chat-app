@@ -26,16 +26,16 @@ export class ChatRepository {
 
       client.release();
 
-      if (result.rows.length === 0) {
-        return undefined; // No chat found for these users
-      }
+      if (result.rows.length === 0) return undefined; // No chat found for these users
 
       // Extract chat information
+      // For now this is empty array of messages
       const chatInfo: Chat = {
         id: result.rows[0].chat_id,
         created_at: result.rows[0].created_at,
         updated_at: result.rows[0].updated_at,
         members: result.rows[0].members,
+        messages: [],
       };
 
       return chatInfo;
@@ -71,6 +71,7 @@ export class ChatRepository {
         created_at: result.rows[0].created_at,
         updated_at: result.rows[0].updated_at,
         members: result.rows[0].members,
+        messages: [],
       };
 
       return chatInfo;
@@ -113,7 +114,7 @@ export class ChatRepository {
 
       if (result.rows.length === 0) return []; // No chats found for this user
 
-      const chats = result.rows.map(
+      const chats: Chat[] = result.rows.map(
         (row: {
           chat_id: any;
           created_at: any;
@@ -125,22 +126,6 @@ export class ChatRepository {
           updated_at: row.updated_at,
           members: row.members,
         })
-      );
-
-      console.log(
-        result.rows.map(
-          (row: {
-            chat_id: any;
-            created_at: any;
-            updated_at: any;
-            members: any;
-          }) => ({
-            id: row.chat_id,
-            created_at: row.created_at,
-            updated_at: row.updated_at,
-            members: row.members,
-          })
-        )
       );
 
       return chats;
@@ -170,6 +155,7 @@ export class ChatRepository {
         );
       }
 
+      // TODO: Fix this so that it returns all * from DB instead of selecting again from DB
       // Fetch chat members after inserting them
       const memberResult = await client.query(
         "SELECT user_id FROM chat_app.user_chat WHERE chat_id = $1",
@@ -185,6 +171,7 @@ export class ChatRepository {
         created_at: chatResult.rows[0].created_at,
         updated_at: chatResult.rows[0].updated_at,
         members: memberResult.rows.map((row: { user_id: any }) => row.user_id),
+        messages: [],
       };
 
       return chatInfo;

@@ -13,6 +13,7 @@ import { environment } from "../environments/environment";
 import { useAlert } from "../providers/AlertProvider";
 import { Router } from "react-router-dom";
 import { Chat } from "@/models/Chat";
+import { Message } from "@/models/Message";
 
 interface ChatContextValue {
   userChats: Chat[] | null;
@@ -20,6 +21,9 @@ interface ChatContextValue {
   potentialChats: User[] | null;
   createChat: any;
   updateCurrChat: any;
+  currChat: Chat | null;
+  messages: Message[] | null;
+  isMessagesLoading: boolean | null
 }
 
 export const ChatContext = createContext<ChatContextValue | undefined>(
@@ -42,9 +46,8 @@ export const ChatContextProvider = ({
   const [isMessagesLoading, setMessagesLoading] = useState<boolean | null>(null);
   const [messagesError, setMessagesError] = useState<boolean | null>(null);
 
-
-
   const { showAlert, hideAlert } = useAlert(); // Use the context hook
+
 
   useEffect(() => {
     const getUsers = async () => {
@@ -59,7 +62,6 @@ export const ChatContextProvider = ({
           return false; // Skip the logged-in user
         }
 
-        // Assuming userChats is an array of Chat objects with 'members' as an array
         if (userChats) {
           const isChatCreated = userChats.some((chat) => {
             return chat.members.includes(u.id);
@@ -100,30 +102,23 @@ export const ChatContextProvider = ({
   }, [user]);
 
 
-  // useEffect(() => {
-  //   const getMessages = async () => {
+  useEffect(() => {
+    const getMessages = async () => {
 
-  //       setMessagesLoading(true);
+        setMessagesLoading(true);
 
-  //       const response = await getRequest(
-  //         `${environment.BASE_URL}/messages/${currChat?.id}`
-  //       );
+        const response = await getRequest(
+          `${environment.BASE_URL}/messages/${currChat?.id}`
+        );
 
-  //       if (response.err) return setMessagesLoading(false);
+        if (response.err) return setMessagesLoading(false);
 
-  //       setUserChats(response);
+        setMessages(response);
+        setMessagesLoading(false);
+      }
 
-  //       setTimeout(() => {
-  //         setMessagesLoading(false);
-  //       }, 2000);
-  //     }
-
-  //   getMessages();
-  // }, [currChat]);
-
-  
-
-
+    getMessages();
+  }, [currChat]);
 
   const updateCurrChat = useCallback((chat: Chat) => {
       setCurrChat(chat);  
@@ -150,7 +145,10 @@ export const ChatContextProvider = ({
         isUserChatsLoading,
         potentialChats,
         createChat,
-        updateCurrChat
+        updateCurrChat,
+        currChat,
+        messages,
+        isMessagesLoading
       }}
     >
       {children}

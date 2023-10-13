@@ -29,7 +29,7 @@ export const useFetchRecipientUser = (chat : Chat | null,user : User | null) => 
         };
     
         getUserById();
-      }, []);
+      }, [recipientId]);
     
       return { recipientUser, error };
 }
