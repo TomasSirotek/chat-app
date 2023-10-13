@@ -14,6 +14,7 @@ import { useAlert } from "../providers/AlertProvider";
 import { Router } from "react-router-dom";
 import { Chat } from "@/models/Chat";
 import { Message } from "@/models/Message";
+import { setTimeout } from "timers/promises";
 
 interface ChatContextValue {
   userChats: Chat[] | null;
@@ -24,6 +25,8 @@ interface ChatContextValue {
   currChat: Chat | null;
   messages: Message[] | null;
   isMessagesLoading: boolean | null
+  createMessage: any 
+  isMsgSending: boolean | null
 }
 
 export const ChatContext = createContext<ChatContextValue | undefined>(
@@ -45,9 +48,8 @@ export const ChatContextProvider = ({
   const [messages, setMessages] = useState<any | null>(null);
   const [isMessagesLoading, setMessagesLoading] = useState<boolean | null>(null);
   const [messagesError, setMessagesError] = useState<boolean | null>(null);
-
+  const [isMsgSending, setIsMsgSending] = useState<boolean | null>(null);
   const { showAlert, hideAlert } = useAlert(); // Use the context hook
-
 
   useEffect(() => {
     const getUsers = async () => {
@@ -80,6 +82,7 @@ export const ChatContextProvider = ({
   }, [userChats]);
 
   useEffect(() => {
+    
     const getUserChats = async () => {
       if (user?.id) {
         setIsUserChatsLoading(true);
@@ -91,10 +94,7 @@ export const ChatContextProvider = ({
         if (response.err) return setIsUserChatsLoading(false);
 
         setUserChats(response);
-
-        setTimeout(() => {
-          setIsUserChatsLoading(false);
-        }, 2000);
+        setIsUserChatsLoading(false);
       }
     };
 
@@ -103,8 +103,9 @@ export const ChatContextProvider = ({
 
 
   useEffect(() => {
-    const getMessages = async () => {
 
+    if(!currChat) return;
+    const getMessages = async () => {
         setMessagesLoading(true);
 
         const response = await getRequest(
@@ -138,6 +139,28 @@ export const ChatContextProvider = ({
     setUserChats((prevChats) => [...(prevChats ?? []), response]);
   }, []);
 
+
+  const createMessage = useCallback(async (chatId: number, senderId: number, body: string) => {
+    
+    setIsMsgSending(true);
+    const response = await postRequest(
+      `${environment.BASE_URL}/messages`,
+      JSON.stringify({ chatId, senderId, body })
+    );
+
+    if (response.err) {
+      setIsMsgSending(false);
+      showAlert(response.msg, "warning");
+      return;
+    } // Show the error message
+
+    setMessages((prevMessages: Message[]) => [...(prevMessages ?? []), response]);
+    
+    setIsMsgSending(false);
+
+  }
+  , [messages]);
+
   return (
     <ChatContext.Provider
       value={{
@@ -148,7 +171,9 @@ export const ChatContextProvider = ({
         updateCurrChat,
         currChat,
         messages,
-        isMessagesLoading
+        isMessagesLoading,
+        createMessage,
+        isMsgSending
       }}
     >
       {children}

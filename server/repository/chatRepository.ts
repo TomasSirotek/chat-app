@@ -44,6 +44,38 @@ export class ChatRepository {
     }
   }
 
+  async getRecipientsAsync(chatIds: number[]): Promise<User[] | undefined> {
+    const query = `
+      SELECT u.id, u.username, u.email
+      FROM chat_app.user u
+      JOIN chat_app.user_chat uc ON u.id = uc.chat_id OR u.id = uc.user_id
+      WHERE uc.chat_id = ANY($1::integer[])
+    `;
+  
+    try {
+      const client = await pgPoolWrapper.connect();
+      const { rows } = await client.query(query, [chatIds]);
+      
+      // Map the query results to User objects
+      const users: User[] = rows.map((row: any) => {
+        return {
+          id: row.id,
+          username: row.username,
+          email: row.email,
+          password: "", // You can set the password to an appropriate value here
+        };
+      });
+  
+      client.release();
+  
+      return users;
+    } catch (error) {
+      console.error("Error in getRecipientsAsync:", error);
+      return undefined;
+    }
+  }
+  
+
   async getChatOfUsersAsync(
     firstId: number,
     secondId: number

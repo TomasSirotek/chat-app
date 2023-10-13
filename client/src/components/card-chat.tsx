@@ -34,7 +34,12 @@ import { AuthContext } from "@/context/AuthContexts";
 import { useContext } from "react";
 import { Message } from "@/models/Message";
 import { CheckCircle2 } from "lucide-react";
+import { getAbbreviatedTimeFromTheDate } from "@/helpers/dateHelper";
+import { ChatContext } from "@/context/ChatContext";
+import { SkeletonMsg } from "./empty-msg-skeleton";
 
+// Todo: Fix this so that it is not hardcoded and user can add to group chats
+// however this has to have another db table and also more logic in the backend as well as the front end
 const users = [
   {
     name: "Olivia Martin",
@@ -65,42 +70,15 @@ const users = [
 
 type User = (typeof users)[number];
 
-export function CardsChat({
-  currentChat,
-  messages,
-}: {
-  currentChat: Chat;
-  messages: Message[];
-}) {
+export function CardsChat({ currentChat,createMessage,isMessageSending }: { currentChat: Chat,createMessage: any,isMessageSending: boolean }) {
   const [open, setOpen] = React.useState(false);
   const [selectedUsers, setSelectedUsers] = React.useState<User[]>([]);
 
   const { user } = useContext(AuthContext) || {};
-  const { recipientUser } = useFetchRecipientUser(currentChat, user ?? null);
+  // const { recipientUser } = useFetchRecipientUser(currentChat, user ?? null);
 
-  console.log(recipientUser);
+  const { isMessagesLoading, messages } = useContext(ChatContext) || {};
 
-  console.log(currentChat.members);
-  console.log(messages);
-
-  // const [messages, setMessages] = React.useState([
-  //   {
-  //     role: "agent",
-  //     content: "Hi, how can I help you today?",
-  //   },
-  //   {
-  //     role: "user",
-  //     content: "Hey, I'm having trouble with my account.",
-  //   },
-  //   {
-  //     role: "agent",
-  //     content: "What seems to be the problem?",
-  //   },
-  //   {
-  //     role: "user",
-  //     content: "I can't log in.",
-  //   },
-  // ])
   const [input, setInput] = React.useState("");
   const inputLength = input.trim().length;
 
@@ -114,8 +92,12 @@ export function CardsChat({
               <AvatarFallback>OM</AvatarFallback>
             </Avatar>
             <div>
-              <p className="text-sm font-medium leading-none">Sofia Davis</p>
-              <p className="text-sm text-muted-foreground">m@example.com</p>
+              <p className="text-sm font-medium leading-none">
+                {/* {recipientUser?.username} */}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {/* {recipientUser?.email} */}
+              </p>
             </div>
           </div>
           <TooltipProvider delayDuration={0}>
@@ -137,38 +119,56 @@ export function CardsChat({
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {messages.map((message, index) => (
-              <div
-                key={index}
-                className={cn(
-                  "flex w-max max-w-[75%] flex-col gap-2 rounded-lg px-3 py-2 text-sm",
-                  message.sender_id === user?.id
-                    ? "ml-auto bg-primary text-primary-foreground"
-                    : "bg-muted"
-                )}
-              >
-                {message.body}
-                <div className="flex justify-end relative">
-                  <span className="relative z-10 text-sm ">22:05 PM </span>
-                  <CheckCircle2 className="w-3 relative z-10" />
-                  <CheckCircle2 className="w-3 relative z-0 -ml-1" />
+            {isMessagesLoading ? (
+              <SkeletonMsg />
+            ) : (
+              messages?.map((message, index) => (
+                <div
+                  key={index}
+                  className={cn(
+                    "flex w-max max-w-[75%] flex-col gap-2 rounded-lg px-3 py-2 text-sm",
+                    message.sender_id === user?.id
+                      ? "ml-auto bg-primary text-primary-foreground"
+                      : "bg-muted"
+                  )}
+                >
+                  {message.body}
+                  <div className="flex justify-end relative items-center">
+                    <span className="relative z-10 text-sm">
+                      {message?.created_at &&
+                        getAbbreviatedTimeFromTheDate(
+                          new Date(message.created_at)
+                        )}
+                    </span>
+                    { isMessageSending ?
+                    <div className="flex">
+                    <CheckCircle2
+                      size={15}
+                      className="relative z-0"
+                      strokeWidth={1.5}
+                    />
+                    <CheckCircle2
+                      size={15}
+                      className="relative z-0 -ml-1"
+                      strokeWidth={1.5}
+                     /> 
+                     </div>
+                     :
+                      <span>Sending ...</span>
+                    }
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </CardContent>
+
         <CardFooter>
           <form
             onSubmit={(event) => {
               event.preventDefault();
               if (inputLength === 0) return;
-              // setMessages([
-              //   ...messages,
-              //   {
-              //     role: "user",
-              //     content: input,
-              //   },
-              // ])
+              createMessage(currentChat.id, user?.id, input);
               setInput("");
             }}
             className="flex w-full items-center space-x-2"
