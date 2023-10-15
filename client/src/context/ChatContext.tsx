@@ -56,12 +56,11 @@ export const ChatContextProvider = ({
   const { showAlert, hideAlert } = useAlert();
 
   const [onlineUsers, setOnlineUsers] = useState<User[]>([]);
-  const [notification, setNotification] = useState<any[] | null>([]);
 
   const [socket, setSocket] = useState<any | null>(null);
 
   useEffect(() => {
-    const nSocket = io("http://localhost:3000");
+    const nSocket = io("http://localhost:3000/");
     setSocket(nSocket);
 
     return () => {
@@ -86,34 +85,9 @@ export const ChatContextProvider = ({
     };
   }, [socket]);
 
-   // recieve message to server and get notification
-   useEffect(() => {
-    if (socket === null) return;
-    
-    socket.on("getMessage", (message: any) => {
-   
-      if (currChat?.id !== message.chat_id) return;
-      
-      setMessages((prevMessages: any) => [...prevMessages, message]);
 
-    });
 
-    socket.on("getNotification", (notification: any) => {
-      const isChatOpen = currChat?.members.some(id => id === notification.chat_id);
 
-      if (isChatOpen){
-        setNotification((prev: any) => [{...notification, isRead: true}, ...prev]);
-      }else {
-        setNotification((prev: any) => [notification,...prev]);
-      }
-    });
-    
-    return () => {
-      socket.off("getMessage");
-      socket.off("getNotification");
-     };
-  }, [socket,user]);
-  
   // send message to server
   useEffect(() => {
     if (socket === null || !user?.id) return;
@@ -126,7 +100,22 @@ export const ChatContextProvider = ({
     socket.emit("sendMessage", { ...newMessage, recipientId });
   }, [newMessage]);
 
- 
+  // recieve message to server
+  useEffect(() => {
+    if (socket === null) return;
+
+    socket.on("getMessage", (message: any) => {
+   
+      if (currChat?.id !== message.chat_id) return;
+      
+      setMessages((prevMessages: any) => [...prevMessages, message]);
+
+    });
+    
+    return () => {
+      socket.off("getMessage");
+    };
+  }, [socket]);
 
   useEffect(() => {
     const getUsers = async () => {
@@ -258,4 +247,3 @@ export const ChatContextProvider = ({
     </ChatContext.Provider>
   );
 };
-

@@ -15,8 +15,6 @@ interface SidebarItemProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 export function SideBarItem({ chat,updateCurrChat,recipientUser,onlineUsers }: SidebarItemProps) {
-   console.log(recipientUser?.id)
-   console.log(onlineUsers)
 
    const isOnline = onlineUsers?.some((u:any) => u.userId === recipientUser?.id) || false;
   return (
