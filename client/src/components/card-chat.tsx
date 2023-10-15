@@ -31,7 +31,7 @@ import {
 import { Chat } from "@/models/Chat";
 import { useFetchRecipientUser } from "@/hooks/useFetchRecipient";
 import { AuthContext } from "@/context/AuthContexts";
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { Message } from "@/models/Message";
 import { CheckCircle2 } from "lucide-react";
 import { getAbbreviatedTimeFromTheDate } from "@/helpers/dateHelper";
@@ -78,9 +78,15 @@ export function CardsChat({ currentChat,createMessage,isMessageSending }: { curr
   // const { recipientUser } = useFetchRecipientUser(currentChat, user ?? null);
 
   const { isMessagesLoading, messages } = useContext(ChatContext) || {};
+  const scroll = React.useRef<HTMLDivElement>(null);
 
   const [input, setInput] = React.useState("");
   const inputLength = input.trim().length;
+
+  useEffect(() => {
+    scroll.current?.scrollIntoView({ behavior: "smooth" });
+  },[messages])
+
 
   return (
     <>
@@ -124,6 +130,7 @@ export function CardsChat({ currentChat,createMessage,isMessageSending }: { curr
             ) : (
               messages?.map((message, index) => (
                 <div
+                  ref={scroll}
                   key={index}
                   className={cn(
                     "flex w-max max-w-[75%] flex-col gap-2 rounded-lg px-3 py-2 text-sm",

@@ -1,0 +1,23 @@
+{
+  "name": "socket",
+  "module": "index.ts",
+  "version": "1.0.0",
+  "description": "socket for application",
+  "type": "commonjs",
+  "author": "tomas",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/cors": "^2.8.14",
+    "@types/express": "^4.17.18",
+    "bun-types": "latest",
+    "ts-node": "^10.9.1"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "install": "^0.13.0",
+    "nodemon": "^3.0.1",
+    "socket.io": "^4.7.2"
+  }
+}

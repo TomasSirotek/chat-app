@@ -3,7 +3,8 @@ import { Menu } from "@/components/menu";
 import { Sidebar } from "@/components/sidebar";
 import { AuthContext } from "@/context/AuthContexts";
 import { ChatContext } from "@/context/ChatContext";
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
+
 
 const Chat = () => {
   const {
@@ -18,6 +19,8 @@ const Chat = () => {
   } = useContext(ChatContext) || {};
 
   const { user } = useContext(AuthContext) || {};
+
+
 
   return (
     <>

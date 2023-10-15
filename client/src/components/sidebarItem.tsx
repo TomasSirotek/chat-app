@@ -11,15 +11,14 @@ interface SidebarItemProps extends React.HTMLAttributes<HTMLDivElement> {
   chat: Chat | null;
   updateCurrChat: (chat: Chat) => void | undefined;
   recipientUser: User | null;
+  onlineUsers: User[]
 }
 
-export function SideBarItem({ chat,updateCurrChat,recipientUser }: SidebarItemProps) {
- 
+export function SideBarItem({ chat,updateCurrChat,recipientUser,onlineUsers }: SidebarItemProps) {
+   console.log(recipientUser?.id)
+   console.log(onlineUsers)
 
-  // THIS IS CAUSING OPENING THE CONNECTION FOR ALL OF THE CHATS AND ALL THE TIME IT IS OPEN
-  // THEN IM GETTING TIMEOUT FROM THE SERVER AND IT IS NOT WORKING AS INTENDED 
-  // THEREFORE THIS HAS TO BE FIXED SO THAT I ONLY FETCH ALL THE RECIPIENTS ONCE ONCE THE PAGE LOADS AND THEN I CAN USE IT
-  
+   const isOnline = onlineUsers?.some((u:any) => u.userId === recipientUser?.id) || false;
   return (
     <>
       <div className="hover:bg-gray-200 hover:rounded-lg flex px-4 py-4 " role="button" onClick={() => updateCurrChat(chat as Chat)}>
@@ -31,7 +30,12 @@ export function SideBarItem({ chat,updateCurrChat,recipientUser }: SidebarItemPr
             />
             <AvatarFallback>OM</AvatarFallback>
           </Avatar>
-          <span className="bg-green-400 rounded-full w-3 h-3 absolute top-0 right-0"></span>
+
+          <span className={isOnline ? "bg-green-400 rounded-full w-3 h-3 absolute top-0 right-0" : "bg-red-500 rounded-full w-3 h-3 absolute top-0 right-0"}
+
+   
+          
+          ></span>
         </div>
 
         <div className="ml-4 space-y-1">

@@ -12,8 +12,6 @@ function App() {
   const authContext = useContext(AuthContext);
   const user = authContext?.user || null;
 
-
- 
     return (
       <>
       <ChatContextProvider user={user}>
