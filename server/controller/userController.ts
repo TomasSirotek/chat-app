@@ -100,8 +100,6 @@ export default class UserController {
   async login(req: Request, res: Response) {
     const { email, password } = req.body;
 
-    console.log(req.body);
-
     if (!email || !password)
       return res.status(StatusCodes.BAD_REQUEST).json({ msg: "Please fill all the fields" });
 

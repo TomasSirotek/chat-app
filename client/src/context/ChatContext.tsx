@@ -15,6 +15,7 @@ import { Router } from "react-router-dom";
 import { Chat } from "@/models/Chat";
 import { Message } from "@/models/Message";
 import { setTimeout } from "timers/promises";
+import { io } from "socket.io-client";
 
 interface ChatContextValue {
   userChats: Chat[] | null;
@@ -24,9 +25,10 @@ interface ChatContextValue {
   updateCurrChat: any;
   currChat: Chat | null;
   messages: Message[] | null;
-  isMessagesLoading: boolean | null
-  createMessage: any 
-  isMsgSending: boolean | null
+  isMessagesLoading: boolean | null;
+  createMessage: any;
+  isMsgSending: boolean | null;
+  onlineUsers: User[];
 }
 
 export const ChatContext = createContext<ChatContextValue | undefined>(
@@ -40,16 +42,80 @@ export const ChatContextProvider = ({
   children: ReactNode;
   user: User | null;
 }) => {
-  const [userChats, setUserChats] = useState<Chat[] | null>(null);
+  const [userChats, setUserChats] = useState<Chat[] | null>([]);
   const [isUserChatsLoading, setIsUserChatsLoading] = useState<boolean>(false);
-  const [potentialChats, setPotentialChats] = useState<User[] | null>(null);
+  const [potentialChats, setPotentialChats] = useState<User[] | null>([]);
   const [currChat, setCurrChat] = useState<Chat | null>(null);
 
   const [messages, setMessages] = useState<any | null>(null);
-  const [isMessagesLoading, setMessagesLoading] = useState<boolean | null>(null);
-  const [messagesError, setMessagesError] = useState<boolean | null>(null);
+  const [isMessagesLoading, setMessagesLoading] = useState<boolean | null>(
+    null
+  );
   const [isMsgSending, setIsMsgSending] = useState<boolean | null>(null);
-  const { showAlert, hideAlert } = useAlert(); // Use the context hook
+  const [newMessage, setNewMessage] = useState<Message | null>(null);
+  const { showAlert, hideAlert } = useAlert();
+
+  const [onlineUsers, setOnlineUsers] = useState<User[]>([]);
+
+  const [socket, setSocket] = useState<any | null>(null);
+
+  useEffect(() => {
+    const nSocket = io("http://localhost:3000/");
+    setSocket(nSocket);
+
+    return () => {
+      nSocket.disconnect();
+    };
+  }, [user]);
+
+  useEffect(() => {
+    if (socket === null || !user?.id) return;
+
+    socket.emit("join", {
+      userId: user.id,
+      socketId: socket.id,
+    });
+
+    socket.on("getUsersOnline", (users: User[]) => {
+      setOnlineUsers(users);
+    });
+
+    return () => {
+      socket.off("getUsersOnline");
+    };
+  }, [socket]);
+
+
+
+
+  // send message to server
+  useEffect(() => {
+    if (socket === null || !user?.id) return;
+
+    const recipientId =
+      currChat?.members.find((id) => id !== user?.id) ?? undefined;
+
+    // console.log(recipientId, "from chat context - send message to server");
+
+    socket.emit("sendMessage", { ...newMessage, recipientId });
+  }, [newMessage]);
+
+  // recieve message to server
+  useEffect(() => {
+    if (socket === null) return;
+
+    socket.on("getMessage", (message: any) => {
+   
+      if (currChat?.id !== message.chat_id) return;
+      
+      setMessages((prevMessages: any) => [...prevMessages, message]);
+
+    });
+    
+    return () => {
+      socket.off("getMessage");
+    };
+  }, [socket]);
 
   useEffect(() => {
     const getUsers = async () => {
@@ -82,7 +148,6 @@ export const ChatContextProvider = ({
   }, [userChats]);
 
   useEffect(() => {
-    
     const getUserChats = async () => {
       if (user?.id) {
         setIsUserChatsLoading(true);
@@ -101,29 +166,27 @@ export const ChatContextProvider = ({
     getUserChats();
   }, [user]);
 
-
   useEffect(() => {
-
-    if(!currChat) return;
+    if (!currChat) return;
     const getMessages = async () => {
-        setMessagesLoading(true);
+      setMessagesLoading(true);
 
-        const response = await getRequest(
-          `${environment.BASE_URL}/messages/${currChat?.id}`
-        );
+      const response = await getRequest(
+        `${environment.BASE_URL}/messages/${currChat?.id}`
+      );
 
-        if (response.err) return setMessagesLoading(false);
+      if (response.err) return setMessagesLoading(false);
 
-        setMessages(response);
-        setMessagesLoading(false);
-      }
+      setMessages(response);
+      setMessagesLoading(false);
+    };
 
     getMessages();
   }, [currChat]);
 
   const updateCurrChat = useCallback((chat: Chat) => {
-      setCurrChat(chat);  
-  } , []);
+    setCurrChat(chat);
+  }, []);
 
   const createChat = useCallback(async (firstId: number, secondId: number) => {
     const response = await postRequest(
@@ -139,27 +202,30 @@ export const ChatContextProvider = ({
     setUserChats((prevChats) => [...(prevChats ?? []), response]);
   }, []);
 
+  const createMessage = useCallback(
+    async (chatId: number, senderId: number, body: string) => {
+      setIsMsgSending(true);
+      const response = await postRequest(
+        `${environment.BASE_URL}/messages`,
+        JSON.stringify({ chatId, senderId, body })
+      );
 
-  const createMessage = useCallback(async (chatId: number, senderId: number, body: string) => {
-    
-    setIsMsgSending(true);
-    const response = await postRequest(
-      `${environment.BASE_URL}/messages`,
-      JSON.stringify({ chatId, senderId, body })
-    );
+      if (response.err) {
+        setIsMsgSending(false);
+        showAlert(response.msg, "warning");
+        return;
+      } // Show the error message
 
-    if (response.err) {
+      setNewMessage(response);
+      setMessages((prevMessages: Message[]) => [
+        ...(prevMessages ?? []),
+        response,
+      ]);
+
       setIsMsgSending(false);
-      showAlert(response.msg, "warning");
-      return;
-    } // Show the error message
-
-    setMessages((prevMessages: Message[]) => [...(prevMessages ?? []), response]);
-    
-    setIsMsgSending(false);
-
-  }
-  , [messages]);
+    },
+    []
+  );
 
   return (
     <ChatContext.Provider
@@ -173,7 +239,8 @@ export const ChatContextProvider = ({
         messages,
         isMessagesLoading,
         createMessage,
-        isMsgSending
+        isMsgSending,
+        onlineUsers,
       }}
     >
       {children}

@@ -27,8 +27,6 @@ export default class ChatController {
       secondId
     );
 
-    console.log(existingChat)
-
     if (existingChat) return res.status(StatusCodes.OK).json(existingChat);
 
     const newChatModel: PostChatDto = {
@@ -93,7 +91,6 @@ export default class ChatController {
 
     if (!existingUsers) return res.status(StatusCodes.OK).json("No chat found");
 
-    console.log("existingUsers =>>>", existingUsers)
     return res.status(StatusCodes.OK).json(existingUsers);
   }
 

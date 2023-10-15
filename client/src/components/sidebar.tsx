@@ -57,6 +57,7 @@ export function Sidebar({
   // here i need to provide single chat and user
   // but it is still fetching only 
   const recipientUsers  = useFetchRecipientUsers(chats as Chat[], user as User);
+  const { onlineUsers } = useContext(ChatContext) as any;
 
   const [open, setOpen] = useState(false);
 
@@ -90,7 +91,7 @@ export function Sidebar({
                 </TooltipTrigger>
                 <TooltipContent sideOffset={10}>New message</TooltipContent>
               </Tooltip>
-            </TooltipProvider>
+            </TooltipProvider> 
           </div>
           <Separator className="my-2" />
           <div>
@@ -99,7 +100,13 @@ export function Sidebar({
             ) : (
               <div className="space-y-8">
                 {chats?.map((chat, index) => (
-                  <SideBarItem  recipientUser={recipientUsers && recipientUsers[index] || null} key={index} chat={chat} updateCurrChat={updateCurrChat}/>
+                  <SideBarItem  recipientUser={
+                    recipientUsers && recipientUsers[index] || null} 
+                    key={index} 
+                    chat={chat} 
+                    onlineUsers={onlineUsers}
+                    updateCurrChat={updateCurrChat}
+                    />
                 ))}
               </div>
             )}

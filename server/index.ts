@@ -29,7 +29,6 @@ app.use('/api/messages', container.resolve(MessageController).routes());
 
 const PORT = process.env.PORT || 5001;
 
-
 app.listen(PORT, (req: Request, res: Response) => {
   console.log(`Server is running on port ${PORT}`);
 });
