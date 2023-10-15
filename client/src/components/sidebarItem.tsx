@@ -17,6 +17,7 @@ interface SidebarItemProps extends React.HTMLAttributes<HTMLDivElement> {
 export function SideBarItem({ chat,updateCurrChat,recipientUser,onlineUsers }: SidebarItemProps) {
 
    const isOnline = onlineUsers?.some((u:any) => u.userId === recipientUser?.id) || false;
+
   return (
     <>
       <div className="hover:bg-gray-200 hover:rounded-lg flex px-4 py-4 " role="button" onClick={() => updateCurrChat(chat as Chat)}>

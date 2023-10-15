@@ -97,6 +97,19 @@ export default class UserController {
       });
   }
 
+
+
+  async autoLogin(req: Request, res: Response) {
+    const token = req.cookies.access_token;
+  
+    const data = JWT.verifyToken(token)
+    // if we received no cookies then user needs to login.
+    if (!token || token === null) return res.sendStatus(StatusCodes.UNAUTHORIZED);
+    const userId = data.id;
+    const user = await this.userService.getUserByIdAsync(userId);
+    return res.send(user);
+  }
+
   async login(req: Request, res: Response) {
     const { email, password } = req.body;
 
@@ -165,6 +178,9 @@ export default class UserController {
     router.get("/logout", authorization, (req: Request, res: Response) =>
       this.logout(req, res)
     );
+    router.get("/refresh", authorization, (req: Request, res: Response) =>
+    this.autoLogin(req, res)
+  );
     router.get("/:id",authorization, (req: Request, res: Response) =>
       this.getUserById(req, res)
     );

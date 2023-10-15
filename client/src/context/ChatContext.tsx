@@ -47,7 +47,7 @@ export const ChatContextProvider = ({
   const [potentialChats, setPotentialChats] = useState<User[] | null>([]);
   const [currChat, setCurrChat] = useState<Chat | null>(null);
 
-  const [messages, setMessages] = useState<any | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [isMessagesLoading, setMessagesLoading] = useState<boolean | null>(
     null
   );
@@ -58,7 +58,9 @@ export const ChatContextProvider = ({
   const [onlineUsers, setOnlineUsers] = useState<User[]>([]);
 
   const [socket, setSocket] = useState<any | null>(null);
+  const [notification, setNotification] = useState<any[]>([]);
 
+  // console.log("currentChat", currChat)
   useEffect(() => {
     const nSocket = io("http://localhost:3000/");
     setSocket(nSocket);
@@ -85,15 +87,13 @@ export const ChatContextProvider = ({
     };
   }, [socket]);
 
-
-
-
   // send message to server
   useEffect(() => {
-    if (socket === null || !user?.id) return;
+    if (socket === null) return;
 
-    const recipientId =
-      currChat?.members.find((id) => id !== user?.id) ?? undefined;
+    const recipientId = currChat?.members.find((id) => id !== user?.id);
+
+    if (!recipientId) return;
 
     // console.log(recipientId, "from chat context - send message to server");
 
@@ -105,17 +105,31 @@ export const ChatContextProvider = ({
     if (socket === null) return;
 
     socket.on("getMessage", (message: any) => {
-   
-      if (currChat?.id !== message.chat_id) return;
-      
-      setMessages((prevMessages: any) => [...prevMessages, message]);
-
+      if (currChat?.id === message.chatId) {
+        setMessages((prevMessages: any) => [...prevMessages, message]);
+      }
     });
-    
+
+    socket.on("getNotification", (notification: any) => {
+      const isChatOpen = currChat?.members.some(
+        (id) => id === notification.senderId
+      );
+
+      if (isChatOpen) {
+        setNotification((prev: any) => [
+          { ...notification, isRead: true },
+          ...prev,
+        ]);
+      } else {
+        setNotification((prev: any) => [notification, ...prev]);
+      }
+    });
+
     return () => {
       socket.off("getMessage");
+      socket.off("getNotification");
     };
-  }, [socket]);
+  }, [socket, currChat]);
 
   useEffect(() => {
     const getUsers = async () => {
@@ -184,7 +198,7 @@ export const ChatContextProvider = ({
     getMessages();
   }, [currChat]);
 
-  const updateCurrChat = useCallback((chat: Chat) => {
+  const updateCurrChat = useCallback((chat: any) => {
     setCurrChat(chat);
   }, []);
 

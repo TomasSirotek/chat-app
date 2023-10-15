@@ -18,15 +18,13 @@ const Chat = () => {
     isMsgSending,
   } = useContext(ChatContext) || {};
 
-  const { user } = useContext(AuthContext) || {};
-
-
+  const { user,logoutUser } = useContext(AuthContext) || {};
 
   return (
     <>
       <div className=" min-h-screen h-full">
         <div className="md:block">
-          <Menu />
+          <Menu logoutUser={logoutUser || (() => {})} />
           <div className="border-t">
             <div className="bg-background">
               <div className="grid lg:grid-cols-5">

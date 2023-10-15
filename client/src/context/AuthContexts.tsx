@@ -3,21 +3,22 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useRef,
   useState,
 } from "react";
 import { User } from "../models/User";
-import { postRequest } from "../utils/Service";
+import { getRequest, postRequest } from "../utils/Service";
 import { environment } from "../environments/environment";
 import { useAlert } from "../providers/AlertProvider";
-import { Router } from "react-router-dom";
-import Cookies from "js-cookie";
+import { useNavigate } from "react-router-dom";
 
 interface AuthContextValue {
   user: User | null;
   registerUser: (info: any) => void;
   loginUser: (info: any) => void;
   isLoading: boolean;
+  logoutUser: () => void;
 }
 
 export const AuthContext = createContext<AuthContextValue | undefined>(
@@ -25,12 +26,49 @@ export const AuthContext = createContext<AuthContextValue | undefined>(
 );
 
 export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
+const navigate = useNavigate();
+
   const [user, setUser] = useState<User | null>(null);
+
   const [registerErr, setRegisterErr] = useState<string | null>(null);
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const { showAlert, hideAlert } = useAlert(); // Use the context hook
+
+  useEffect(() => {
+    async function autoLogin() {
+      const res = await getRequest( `${environment.BASE_URL}/users/refresh`);
+
+      if (res.err) {
+        showAlert(res.msg, "warning"); // Show the error message
+        setUser(null); 
+        navigate("/login");
+        return;
+      }
+      showAlert(res.message, "success");
+      setUser(res); 
+      navigate("/");
+    }
+    autoLogin();
+  }, []);
+
+
+  // logout user 
+  const logoutUser = useCallback(async () => {
+    
+    const res = await getRequest(
+      `${environment.BASE_URL}/users/logout`,
+    );
+
+    if (res.err) {
+      showAlert(res.msg, "warning"); // Show the error message
+      return;
+    }
+    showAlert(res.message, "success");
+    setUser(null);
+    navigate("/login");
+  }, []);
 
   //TODO: Fix this LATER
   const registerUser = useCallback(
@@ -102,6 +140,7 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
     };
 
     setUser(userData);
+    navigate("/");
 
     setTimeout(() => {
       hideAlert();
@@ -115,6 +154,7 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
         registerUser,
         isLoading,
         loginUser,
+        logoutUser
       }}
     >
       {children}
