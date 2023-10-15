@@ -2,7 +2,7 @@ import { Socket } from "socket.io";
 
 const { Server } = require('socket.io');
 
-const io = new Server({ cors: "http://localhost:5173/"});
+const io = new Server({ cors: "http://localhost:5173"});
 
 
 let onlineUser = [] as User[];
@@ -20,9 +20,7 @@ io.on('connection', (socket: Socket) => {
             userId: user.userId,
             socketId: socket.id,
           });
-      
-          console.log("Online users: " + JSON.stringify(onlineUser));
-      
+            
           // Send back online users to all connected clients
           io.emit('getUsersOnline', onlineUser);
         }
@@ -35,8 +33,11 @@ io.on('connection', (socket: Socket) => {
         
         if(user) {
           io.to(user.socketId).emit("getMessage", message);
-          console.log("Message: " + JSON.stringify(message));
-          console.log("Message sent to user: " + JSON.stringify(user));
+          io.to(user.socketId).emit("getNotification",{
+            senderId: message.senderId,
+            isRead: false,
+            date: new Date(),
+          });
         }
 
       });
