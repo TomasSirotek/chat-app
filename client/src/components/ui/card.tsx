@@ -4,14 +4,14 @@ const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElemen
   ({ className, children, ...props }, ref) => (
     <div
       ref={ref}
-      className="rounded-xl border bg-card text-card-foreground shadow flex flex-col flex-grow"
-     
+      className="rounded-xl border bg-card text-card-foreground shadow flex flex-col min-h-main"
       {...props}
     >
       {children}
     </div>
   )
 );
+
 Card.displayName = 'Card';
 
 const CardHeader = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
@@ -43,12 +43,12 @@ const CardContent = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDi
   ({ className, ...props }, ref) => (
     <div
       ref={ref}
-      className="p-6 pt-0 overflow-y-auto h-64" // Apply a fixed height and overflow-y to make content scrollable
-      style={{ minHeight: '50vh' }} 
+      className="p-6 pt-0 flex-grow overflow-y-auto h-[calc(80vh-4rem)]" // Adjust the height as needed
       {...props}
     />
   )
 );
+
 CardContent.displayName = 'CardContent';
 
 const CardFooter = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(

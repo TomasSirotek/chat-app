@@ -33,7 +33,7 @@ import { useFetchRecipientUser } from "@/hooks/useFetchRecipient";
 import { AuthContext } from "@/context/AuthContexts";
 import { useContext, useEffect } from "react";
 import { Message } from "@/models/Message";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, Settings, Trash } from "lucide-react";
 import { getAbbreviatedTimeFromTheDate } from "@/helpers/dateHelper";
 import { ChatContext } from "@/context/ChatContext";
 import { SkeletonMsg } from "./empty-msg-skeleton";
@@ -70,12 +70,20 @@ const users = [
 
 type User = (typeof users)[number];
 
-export function CardsChat({ currentChat,createMessage,isMessageSending }: { currentChat: Chat,createMessage: any,isMessageSending: boolean }) {
+export function CardsChat({
+  currentChat,
+  createMessage,
+  isMessageSending,
+}: {
+  currentChat: Chat;
+  createMessage: any;
+  isMessageSending: boolean;
+}) {
   const [open, setOpen] = React.useState(false);
   const [selectedUsers, setSelectedUsers] = React.useState<User[]>([]);
 
   const { user } = useContext(AuthContext) || {};
-  // const { recipientUser } = useFetchRecipientUser(currentChat, user ?? null);
+  const { recipientUser } = useFetchRecipientUser(currentChat, user ?? null);
 
   const { isMessagesLoading, messages } = useContext(ChatContext) || {};
   const scroll = React.useRef<HTMLDivElement>(null);
@@ -85,13 +93,12 @@ export function CardsChat({ currentChat,createMessage,isMessageSending }: { curr
 
   useEffect(() => {
     scroll.current?.scrollIntoView({ behavior: "smooth" });
-  },[messages])
-
+  }, [messages]);
 
   return (
     <>
       <Card>
-        <CardHeader className="flex flex-row items-center">
+        <CardHeader className="flex flex-row">
           <div className="flex items-center space-x-4">
             <Avatar>
               <AvatarImage src="/avatars/01.png" alt="Image" />
@@ -99,30 +106,51 @@ export function CardsChat({ currentChat,createMessage,isMessageSending }: { curr
             </Avatar>
             <div>
               <p className="text-sm font-medium leading-none">
-                {/* {recipientUser?.username} */}
+                {recipientUser?.username}
               </p>
               <p className="text-sm text-muted-foreground">
-                {/* {recipientUser?.email} */}
+                {recipientUser?.email}
               </p>
             </div>
           </div>
-          <TooltipProvider delayDuration={0}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  size="icon"
-                  variant="outline"
-                  className="ml-auto rounded-full"
-                  onClick={() => setOpen(true)}
-                >
-                  <PlusIcon className="h-4 w-4" />
-                  <span className="sr-only">New message</span>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent sideOffset={10}>New message</TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+
+          <div className="ml-auto">
+            <TooltipProvider delayDuration={0}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="icon"
+                    variant="outline"
+                    className="rounded-full mr-2"
+                    onClick={() => setOpen(true)}
+                  >
+                    <PlusIcon className="h-4 w-4" />
+                    <span className="sr-only">New message</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent sideOffset={10}>New message</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+
+            <TooltipProvider delayDuration={0}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="icon"
+                    variant="outline"
+                    className="rounded-full"
+                    onClick={() => console.log("Settings")}
+                  >
+                    <Trash className="h-4 w-4" />
+                    <span className="sr-only">Delete chat</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent sideOffset={10}>Delete chat</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
         </CardHeader>
+
         <CardContent>
           <div className="space-y-4">
             {isMessagesLoading ? (
@@ -147,22 +175,22 @@ export function CardsChat({ currentChat,createMessage,isMessageSending }: { curr
                           new Date(message.created_at)
                         )}
                     </span>
-                    { isMessageSending ?
-                    <div className="flex">
-                    <CheckCircle2
-                      size={15}
-                      className="relative z-0"
-                      strokeWidth={1.5}
-                    />
-                    <CheckCircle2
-                      size={15}
-                      className="relative z-0 -ml-1"
-                      strokeWidth={1.5}
-                     /> 
-                     </div>
-                     :
+                    {isMessageSending ? (
+                      <div className="flex">
+                        <CheckCircle2
+                          size={15}
+                          className="relative z-0"
+                          strokeWidth={1.5}
+                        />
+                        <CheckCircle2
+                          size={15}
+                          className="relative z-0 -ml-1"
+                          strokeWidth={1.5}
+                        />
+                      </div>
+                    ) : (
                       <span>Sending ...</span>
-                    }
+                    )}
                   </div>
                 </div>
               ))
