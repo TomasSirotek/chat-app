@@ -40,6 +40,8 @@ import PotentialChats from "@/pages/PotentialChats";
 import { PenSquare } from "lucide-react";
 import { getAbbreviatedDayOfWeek } from "@/helpers/dateHelper";
 import { Badge } from "./ui/badge";
+import { unreadNotificationsFunc } from "@/utils/unreadNotificationsFunc";
+import { useFetchLatestMsg } from "@/hooks/fetchLatestMsg";
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
   chats: Chat[] | null | undefined;
@@ -60,13 +62,18 @@ export function Sidebar({
   pChats,
 }: SidebarProps) {
   const [selectedUser, setSelectedUser] = useState<User>();
-  // here i need to provide single chat and user
-  // but it is still fetching only
+
   const recipientUsers = useFetchRecipientUsers(chats as Chat[], user as User);
-  const { onlineUsers } = useContext(ChatContext) as any;
+
+  const { onlineUsers, notification, markThisUserNotificationsAsRead } =
+    useContext(ChatContext) as any;
+
+  const unreadNotifications = unreadNotificationsFunc(notification);
+
   const [open, setOpen] = useState(false);
   const { currChat } = useContext(ChatContext) || {};
 
+  // const { latestMsg ,loading} = useFetchLatestMsg(chats as Chat[]);
   const handleOpen = () => {
     setSelectedUser(undefined);
     open ? setOpen(false) : setOpen(true);
@@ -106,8 +113,9 @@ export function Sidebar({
               <CommandEmpty>No users found.</CommandEmpty>
               <CommandGroup>
                 {chats?.map((chat, index) => (
+                  
                   <CommandItem
-                    key={chat.id}
+                    key={index}
                     className={`${
                       currChat?.id === chat.id
                         ? "bg-gray-200 rounded-lg flex py-4 dark:bg-gray-500 flex items-center px-2 current-chat"
@@ -115,6 +123,13 @@ export function Sidebar({
                     }`}
                     onSelect={() => {
                       updateCurrChat(chat);
+                      if(notification?.length !== 0){
+                        markThisUserNotificationsAsRead(
+                          unreadNotifications?.filter(
+                            (n: any) => n?.senderId === recipientUsers?.[index].id),
+                          notification 
+                        );
+                      }
                     }}
                   >
                     <div className="relative">
@@ -144,17 +159,30 @@ export function Sidebar({
                       <p className="text-sm font-medium leading-none truncate w-24" >
                         {recipientUsers && recipientUsers[index]?.username}
                       </p>
-                      <p className="text-sm text-muted-foreground truncate w-32">
-                        {recipientUsers && recipientUsers[index]?.email}
-                      </p>
-                    </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground truncate w-32">
+                          
+                         {/* {loading ? latestMsg && latestMsg[index] : "Loading..."} */}
+                         Message
+                        </p>
+                      </div>
+                      </div>
                     <div className="ml-auto text-xs flex flex-col text-end">
                       <span className="text-muted-foreground text-gray-400 ">
                         {chat?.updated_at &&
                           getAbbreviatedDayOfWeek(new Date(chat.updated_at))}
                       </span>
-                      <span>
-                        <Badge variant="default">2</Badge>
+                      <span className={  unreadNotifications?.filter(
+                              (n: any) => n.senderId === recipientUsers?.[index].id
+                            ).length > 0 ? "" : "hidden"}>
+                        <Badge variant="default">
+                          {
+                             unreadNotifications?.filter(
+                              (n: any) => n.senderId === recipientUsers?.[index].id
+                            ).length
+                          }
+
+                        </Badge>
                       </span>
                     </div>
                   </CommandItem>

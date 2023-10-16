@@ -3,6 +3,7 @@ import { Menu } from "@/components/menu";
 import { Sidebar } from "@/components/sidebar";
 import { AuthContext } from "@/context/AuthContexts";
 import { ChatContext } from "@/context/ChatContext";
+import { useFetchLatestMsg } from "@/hooks/fetchLatestMsg";
 import { useContext, useEffect, useState } from "react";
 
 
@@ -16,9 +17,12 @@ const Chat = () => {
     createMessage,
     updateCurrChat,
     isMsgSending,
+    notification
   } = useContext(ChatContext) || {};
 
   const { user,logoutUser } = useContext(AuthContext) || {};
+
+
 
   return (
     <>
@@ -45,7 +49,7 @@ const Chat = () => {
                        createMessage={createMessage} />
                     ) : (
                       // Fix later with something else 
-                      <div className="flex justify-center items-center">
+                      <div className="flex justify-center items-center min-h-main">
                         <span>Nothing selected for now </span>
                       </div>
                     )}

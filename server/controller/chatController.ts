@@ -79,7 +79,6 @@ export default class ChatController {
 
     const chatIds = req.params.chatId.split(",").map(Number);
 
-    console.log("recipients in controller =>>>", chatIds);
 
 
     if (!chatIds)

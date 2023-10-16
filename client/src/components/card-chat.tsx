@@ -101,7 +101,7 @@ export function CardsChat({
         <CardHeader className="flex flex-row">
           <div className="flex items-center space-x-4">
             <Avatar>
-              <AvatarImage src="/avatars/01.png" alt="Image" />
+              <AvatarImage src="" alt="Image" />
               <AvatarFallback>OM</AvatarFallback>
             </Avatar>
             <div>
@@ -125,10 +125,10 @@ export function CardsChat({
                     onClick={() => setOpen(true)}
                   >
                     <PlusIcon className="h-4 w-4" />
-                    <span className="sr-only">New message</span>
+                    <span className="sr-only">Add to the group chat</span>
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent sideOffset={10}>New message</TooltipContent>
+                <TooltipContent sideOffset={10}>New Group</TooltipContent>
               </Tooltip>
             </TooltipProvider>
 
@@ -162,12 +162,25 @@ export function CardsChat({
                   key={index}
                   className={cn(
                     "flex w-max max-w-[75%] flex-col gap-2 rounded-lg px-3 py-2 text-sm",
-                    message.sender_id === user?.id
+                    message.senderId === user?.id
                       ? "ml-auto bg-primary text-primary-foreground"
                       : "bg-muted"
                   )}
                 >
-                  {message.body}
+                  <div className="flex items-center">
+                    {message.senderId !== user?.id && (
+                      <Avatar>
+                        <AvatarImage
+                          src="https://api.dicebear.com/7.x/bottts/svg"
+                          alt="Image"
+                        />
+                        <AvatarFallback>OM</AvatarFallback>
+                      </Avatar>
+                    )}
+                    <div className=" p-2">
+                      <span>{message.body}</span>
+                    </div>
+                  </div>
                   <div className="flex justify-end relative items-center">
                     <span className="relative z-10 text-sm">
                       {message?.created_at &&
@@ -227,7 +240,7 @@ export function CardsChat({
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="gap-0 p-0 outline-none">
           <DialogHeader className="px-4 pb-4 pt-5">
-            <DialogTitle>New message</DialogTitle>
+            <DialogTitle>New Group</DialogTitle>
             <DialogDescription>
               Invite a user to this thread. This will create a new group
               message.
@@ -235,7 +248,7 @@ export function CardsChat({
           </DialogHeader>
           <Command className="overflow-hidden rounded-t-none border-t bg-transparent">
             <CommandInput placeholder="Search user..." />
-            <CommandList>
+            <CommandList isSidebar={false}>
               <CommandEmpty>No users found.</CommandEmpty>
               <CommandGroup className="p-2">
                 {users.map((user) => (
