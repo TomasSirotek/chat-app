@@ -30,7 +30,7 @@ export class MesssageRepository {
           created_at: Date,
         }) => ({
           chat_id: row.chat_id,
-          sender_id: row.sender_id,
+          senderId: row.sender_id,
           body: row.body,
           created_at: row.created_at,
         })

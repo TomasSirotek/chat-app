@@ -28,6 +28,7 @@ io.on('connection', (socket: Socket) => {
 
       // listen to message emited from client   
       socket.on("sendMessage", (message: any) => {
+
         const user = onlineUser.find((user) => user.userId === message.recipientId);
 
         

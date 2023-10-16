@@ -33,7 +33,7 @@ import { useFetchRecipientUser } from "@/hooks/useFetchRecipient";
 import { AuthContext } from "@/context/AuthContexts";
 import { useContext, useEffect } from "react";
 import { Message } from "@/models/Message";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, Settings, Trash } from "lucide-react";
 import { getAbbreviatedTimeFromTheDate } from "@/helpers/dateHelper";
 import { ChatContext } from "@/context/ChatContext";
 import { SkeletonMsg } from "./empty-msg-skeleton";
@@ -70,12 +70,20 @@ const users = [
 
 type User = (typeof users)[number];
 
-export function CardsChat({ currentChat,createMessage,isMessageSending }: { currentChat: Chat,createMessage: any,isMessageSending: boolean }) {
+export function CardsChat({
+  currentChat,
+  createMessage,
+  isMessageSending,
+}: {
+  currentChat: Chat;
+  createMessage: any;
+  isMessageSending: boolean;
+}) {
   const [open, setOpen] = React.useState(false);
   const [selectedUsers, setSelectedUsers] = React.useState<User[]>([]);
 
   const { user } = useContext(AuthContext) || {};
-  // const { recipientUser } = useFetchRecipientUser(currentChat, user ?? null);
+  const { recipientUser } = useFetchRecipientUser(currentChat, user ?? null);
 
   const { isMessagesLoading, messages } = useContext(ChatContext) || {};
   const scroll = React.useRef<HTMLDivElement>(null);
@@ -85,44 +93,64 @@ export function CardsChat({ currentChat,createMessage,isMessageSending }: { curr
 
   useEffect(() => {
     scroll.current?.scrollIntoView({ behavior: "smooth" });
-  },[messages])
-
+  }, [messages]);
 
   return (
     <>
       <Card>
-        <CardHeader className="flex flex-row items-center">
+        <CardHeader className="flex flex-row">
           <div className="flex items-center space-x-4">
             <Avatar>
-              <AvatarImage src="/avatars/01.png" alt="Image" />
+              <AvatarImage src="" alt="Image" />
               <AvatarFallback>OM</AvatarFallback>
             </Avatar>
             <div>
               <p className="text-sm font-medium leading-none">
-                {/* {recipientUser?.username} */}
+                {recipientUser?.username}
               </p>
               <p className="text-sm text-muted-foreground">
-                {/* {recipientUser?.email} */}
+                {recipientUser?.email}
               </p>
             </div>
           </div>
-          <TooltipProvider delayDuration={0}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  size="icon"
-                  variant="outline"
-                  className="ml-auto rounded-full"
-                  onClick={() => setOpen(true)}
-                >
-                  <PlusIcon className="h-4 w-4" />
-                  <span className="sr-only">New message</span>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent sideOffset={10}>New message</TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+
+          <div className="ml-auto">
+            <TooltipProvider delayDuration={0}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="icon"
+                    variant="outline"
+                    className="rounded-full mr-2"
+                    onClick={() => setOpen(true)}
+                  >
+                    <PlusIcon className="h-4 w-4" />
+                    <span className="sr-only">Add to the group chat</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent sideOffset={10}>New Group</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+
+            <TooltipProvider delayDuration={0}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="icon"
+                    variant="outline"
+                    className="rounded-full"
+                    onClick={() => console.log("Settings")}
+                  >
+                    <Trash className="h-4 w-4" />
+                    <span className="sr-only">Delete chat</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent sideOffset={10}>Delete chat</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
         </CardHeader>
+
         <CardContent>
           <div className="space-y-4">
             {isMessagesLoading ? (
@@ -134,12 +162,25 @@ export function CardsChat({ currentChat,createMessage,isMessageSending }: { curr
                   key={index}
                   className={cn(
                     "flex w-max max-w-[75%] flex-col gap-2 rounded-lg px-3 py-2 text-sm",
-                    message.sender_id === user?.id
+                    message.senderId === user?.id
                       ? "ml-auto bg-primary text-primary-foreground"
                       : "bg-muted"
                   )}
                 >
-                  {message.body}
+                  <div className="flex items-center">
+                    {message.senderId !== user?.id && (
+                      <Avatar>
+                        <AvatarImage
+                          src="https://api.dicebear.com/7.x/bottts/svg"
+                          alt="Image"
+                        />
+                        <AvatarFallback>OM</AvatarFallback>
+                      </Avatar>
+                    )}
+                    <div className=" p-2">
+                      <span>{message.body}</span>
+                    </div>
+                  </div>
                   <div className="flex justify-end relative items-center">
                     <span className="relative z-10 text-sm">
                       {message?.created_at &&
@@ -147,22 +188,22 @@ export function CardsChat({ currentChat,createMessage,isMessageSending }: { curr
                           new Date(message.created_at)
                         )}
                     </span>
-                    { isMessageSending ?
-                    <div className="flex">
-                    <CheckCircle2
-                      size={15}
-                      className="relative z-0"
-                      strokeWidth={1.5}
-                    />
-                    <CheckCircle2
-                      size={15}
-                      className="relative z-0 -ml-1"
-                      strokeWidth={1.5}
-                     /> 
-                     </div>
-                     :
+                    {isMessageSending ? (
+                      <div className="flex">
+                        <CheckCircle2
+                          size={15}
+                          className="relative z-0"
+                          strokeWidth={1.5}
+                        />
+                        <CheckCircle2
+                          size={15}
+                          className="relative z-0 -ml-1"
+                          strokeWidth={1.5}
+                        />
+                      </div>
+                    ) : (
                       <span>Sending ...</span>
-                    }
+                    )}
                   </div>
                 </div>
               ))
@@ -199,7 +240,7 @@ export function CardsChat({ currentChat,createMessage,isMessageSending }: { curr
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="gap-0 p-0 outline-none">
           <DialogHeader className="px-4 pb-4 pt-5">
-            <DialogTitle>New message</DialogTitle>
+            <DialogTitle>New Group</DialogTitle>
             <DialogDescription>
               Invite a user to this thread. This will create a new group
               message.
@@ -207,7 +248,7 @@ export function CardsChat({ currentChat,createMessage,isMessageSending }: { curr
           </DialogHeader>
           <Command className="overflow-hidden rounded-t-none border-t bg-transparent">
             <CommandInput placeholder="Search user..." />
-            <CommandList>
+            <CommandList isSidebar={false}>
               <CommandEmpty>No users found.</CommandEmpty>
               <CommandGroup className="p-2">
                 {users.map((user) => (

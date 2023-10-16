@@ -31,7 +31,6 @@ export const useFetchRecipientUser = (chat: Chat | null, user: User | null) => {
   return { recipientUser, error };
 };
 
-// Update your useFetchRecipientUsers function to call the new endpoint
 export const useFetchRecipientUsers = (chats: Chat[], user: User) => {
   const [recipientUsers, setRecipientUsers] = useState<User[]>();
 
