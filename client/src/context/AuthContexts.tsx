@@ -96,7 +96,7 @@ const navigate = useNavigate();
         showAlert(res.msg, "warning"); // Show the error message
         return;
       }
-      showAlert("Succesfully registered ", "success");
+      showAlert(res.message, "success");
 
       setUser(res);
     },
@@ -104,6 +104,7 @@ const navigate = useNavigate();
   );
 
   const loginUser = useCallback(async (formData: FormData) => {
+    
     setRegisterErr(null);
 
     const loginInfo = {
@@ -141,10 +142,6 @@ const navigate = useNavigate();
 
     setUser(userData);
     navigate("/");
-
-    setTimeout(() => {
-      hideAlert();
-    }, 3000);
   }, []);
 
   return (

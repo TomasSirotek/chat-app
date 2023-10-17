@@ -29,6 +29,10 @@ export function AlertProvider({ children }: { children: ReactNode }) {
     setAlertMessage(message);
     setSeverity(severity);
     setIsOpen(true);
+
+    setTimeout(() => {
+      hideAlert();
+    } , 2000);
   };
 
   const hideAlert = () => {

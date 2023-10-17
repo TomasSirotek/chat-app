@@ -12,6 +12,8 @@ export interface User {
     userId: number;
 }
 
+
+
 io.on('connection', (socket: Socket) => {
     
     socket.on('join', (user: User) => {
@@ -43,6 +45,21 @@ io.on('connection', (socket: Socket) => {
 
       });
 
+      socket.on("typing", (typeObject: any) => {
+        const user = onlineUser.find((user) => user.userId === typeObject.recipientId);
+
+        if (user) {
+          
+          const chatId = typeObject.chatId // Get the chatId of the recipient
+          console.log(typeObject)
+          
+          socket.broadcast.to(user.socketId).emit("userTyping", {
+            isTyping: typeObject.isTyping,
+            recipientId: user.userId,
+            chatId, // Pass chatId
+          });
+        }
+      });
 
      socket.on('disconnect', () => {
         onlineUser = onlineUser.filter((user) => user.socketId !== socket.id);

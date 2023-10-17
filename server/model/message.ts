@@ -4,20 +4,20 @@ export interface Message {
     chatId : number,
     senderId: number,
     body: string,
-    created_at: Date,
+    createdAt: Date,
   }
 
 export class MessageModel implements Message{
     chatId : number;
     senderId: number;
     body: string;
-    created_at: Date;
+    createdAt: Date;
 
-    constructor(chatId : number, senderId: number, body: string, created_at: Date) {
+    constructor(chatId : number, senderId: number, body: string, createdAt: Date) {
         this.chatId = chatId;
         this.senderId = senderId;
         this.body = body;
-        this.created_at = created_at;
+        this.createdAt = createdAt;
     } 
 }
 

@@ -37,6 +37,8 @@ import { CheckCircle2, Settings, Trash } from "lucide-react";
 import { getAbbreviatedTimeFromTheDate } from "@/helpers/dateHelper";
 import { ChatContext } from "@/context/ChatContext";
 import { SkeletonMsg } from "./empty-msg-skeleton";
+import Lottie from "lottie-react";
+import typing from "../animations/typing.json";
 
 // Todo: Fix this so that it is not hardcoded and user can add to group chats
 // however this has to have another db table and also more logic in the backend as well as the front end
@@ -73,11 +75,9 @@ type User = (typeof users)[number];
 export function CardsChat({
   currentChat,
   createMessage,
-  isMessageSending,
 }: {
   currentChat: Chat;
-  createMessage: any;
-  isMessageSending: boolean;
+  createMessage: (chatId: number, senderId: number, body: string) => void;
 }) {
   const [open, setOpen] = React.useState(false);
   const [selectedUsers, setSelectedUsers] = React.useState<User[]>([]);
@@ -85,15 +85,29 @@ export function CardsChat({
   const { user } = useContext(AuthContext) || {};
   const { recipientUser } = useFetchRecipientUser(currentChat, user ?? null);
 
-  const { isMessagesLoading, messages } = useContext(ChatContext) || {};
+  const {
+    isMessagesLoading,
+    messages,
+    typingUsers,
+    startTyping,
+    isMsgSending,
+  } = useContext(ChatContext) || {};
   const scroll = React.useRef<HTMLDivElement>(null);
-
   const [input, setInput] = React.useState("");
   const inputLength = input.trim().length;
 
+  const style = {
+    height: 80,
+  };
+
   useEffect(() => {
     scroll.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, typingUsers]);
+
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setInput(event.target.value);
+    startTyping();
+  };
 
   return (
     <>
@@ -158,57 +172,64 @@ export function CardsChat({
             ) : (
               messages?.map((message, index) => (
                 <div
-                  ref={scroll}
-                  key={index}
-                  className={cn(
-                    "flex w-max max-w-[75%] flex-col gap-2 rounded-lg px-3 py-2 text-sm",
-                    message.senderId === user?.id
-                      ? "ml-auto bg-primary text-primary-foreground"
-                      : "bg-muted"
-                  )}
-                >
-                  <div className="flex items-center">
-                    {message.senderId !== user?.id && (
-                      <Avatar>
-                        <AvatarImage
-                          src="https://api.dicebear.com/7.x/bottts/svg"
-                          alt="Image"
-                        />
-                        <AvatarFallback>OM</AvatarFallback>
-                      </Avatar>
-                    )}
-                    <div className=" p-2">
-                      <span>{message.body}</span>
-                    </div>
-                  </div>
-                  <div className="flex justify-end relative items-center">
-                    <span className="relative z-10 text-sm">
-                      {message?.created_at &&
-                        getAbbreviatedTimeFromTheDate(
-                          new Date(message.created_at)
-                        )}
-                    </span>
-                    {isMessageSending ? (
-                      <div className="flex">
-                        <CheckCircle2
-                          size={15}
-                          className="relative z-0"
-                          strokeWidth={1.5}
-                        />
-                        <CheckCircle2
-                          size={15}
-                          className="relative z-0 -ml-1"
-                          strokeWidth={1.5}
-                        />
+                ref={scroll}
+                key={index}
+                className={cn(
+                  "flex w-max max-w-[75%] flex-col gap-2 rounded-lg px-3 py-2 text-sm",
+                  message.senderId === user?.id
+                    ? "ml-auto bg-primary text-primary-foreground"
+                    : "bg-muted"
+                )}
+              >
+                <div className="flex items-center">
+                  {message.senderId !== user?.id && (
+                    <div className="flex flex-col items-center mr-2">
+                      <div className="flex items-center">
+                        <Avatar className="rounded-full overflow-hidden bg-transparent">
+                          <AvatarImage
+                            src="https://api.dicebear.com/7.x/bottts/svg"
+                            alt="Image"
+                          />
+                          <AvatarFallback>OM</AvatarFallback>
+                        </Avatar>
                       </div>
-                    ) : (
-                      <span>Sending ...</span>
-                    )}
+                    </div>
+                  )}
+                  <div className="flex flex-col p-1">
+                    <span className="font-bold text-left">
+                      {message.senderId === user?.id ? "You" : recipientUser?.username}
+                    </span>
+                    <span>
+                      {message.body}
+                      <span className="ml-2 text-xs">
+                      {message?.createdAt &&
+                        ` ${getAbbreviatedTimeFromTheDate(new Date(message.createdAt))}`}
+
+                      </span>
+                    </span>
                   </div>
                 </div>
+              </div>
+              
               ))
             )}
           </div>
+
+          {typingUsers.length > 0 && (
+            <div className="flex justify-start">
+              <div
+                className={cn("flex flex-col gap-2 rounded-lg py-2 text-sm")}
+              >
+                <div className="flex items-center">
+                  <Lottie
+                    animationData={typing}
+                    loop={true}
+                    style={style} // Adjust the width to make it smaller
+                  />
+                </div>
+              </div>
+            </div>
+          )}
         </CardContent>
 
         <CardFooter>
@@ -216,7 +237,7 @@ export function CardsChat({
             onSubmit={(event) => {
               event.preventDefault();
               if (inputLength === 0) return;
-              createMessage(currentChat.id, user?.id, input);
+              createMessage(currentChat.id, user?.id as number, input);
               setInput("");
             }}
             className="flex w-full items-center space-x-2"
@@ -227,7 +248,7 @@ export function CardsChat({
               className="flex-1"
               autoComplete="off"
               value={input}
-              onChange={(event) => setInput(event.target.value)}
+              onChange={handleInputChange}
             />
             <Button type="submit" size="icon" disabled={inputLength === 0}>
               <PaperPlaneIcon className="h-4 w-4" />
