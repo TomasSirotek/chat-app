@@ -1,38 +1,7 @@
-import { AuthContext } from "../context/AuthContexts";
-import { useContext, useState } from "react";
-import SaveIcon from "@mui/icons-material/Save";
-import { getRequest } from "../utils/Service";
-import { environment } from "../environments/environment";
-import Link from "@mui/material/Link";
-import React, { Suspense } from "react";
-import { useImage } from "react-image";
 import { UserAuthForm } from "@/components/ui/user-auth-form";
-import { ReactSVG } from "react-svg";
-import { Button } from "@/components/ui/button";
+import Link from "@mui/material/Link";
 
 const Login = () => {
-  const { isLoading, loginUser } = useContext(AuthContext) || {};
-  const [error, setError] = useState("");
-
-  const formRef = React.useRef<HTMLFormElement | null>(null);
-
-  const [user, setUser] = useState<any[]>([]);
-
-  const getUser = async () => {
-    const res = await getRequest(`${environment.BASE_URL}/users/login`);
-
-    if (res.err) {
-      console.log(res.msg);
-      return;
-    }
-    setUser(res.data);
-  };
-
-  const handleFormSubmit = (formData: any) => {
-    if (loginUser) {
-      loginUser(formData);
-    }
-  };
   return (
     <>
       <div className="container min-h-screen relative flex-col items-center justify-center md:grid lg:max-w-none lg:grid-cols-2 lg:px-0">
@@ -74,7 +43,7 @@ const Login = () => {
                 Enter your email below to create your account
               </p>
             </div>
-            <UserAuthForm formRef={formRef} onSubmit={handleFormSubmit} />
+            <UserAuthForm />
             <p className="px-8 text-center text-sm text-muted-foreground">
               <Link href="/login" variant="body2">
                 Already have an account? Sign in

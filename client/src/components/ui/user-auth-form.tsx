@@ -5,44 +5,36 @@ import { Label } from "./label";
 import { Input } from "./input";
 import { Loader } from "lucide-react";
 
-import { FormEvent } from "react";
+import { FormEvent, useContext } from "react";
+import { AuthContext } from "@/context/AuthContexts";
 
 interface UserAuthFormProps
-  extends Omit<React.HTMLAttributes<HTMLDivElement>, "onSubmit"> {
-  formRef: React.RefObject<HTMLFormElement>;
-  onSubmit: (formData: FormData) => void;
-}
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, "onSubmit"> {}
 
 export function UserAuthForm({
   className,
-  formRef,
-  onSubmit,
+
   ...props
 }: UserAuthFormProps) {
-  const [isLoading, setIsLoading] = React.useState<boolean>(false);
+  const { isLoading, loginUser } = useContext(AuthContext) || {};
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const formRef = React.useRef<HTMLFormElement | null>(null);
+
+  const handleFormSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
-    setIsLoading(true);
 
     const formData = formRef.current
       ? new FormData(formRef.current)
       : undefined;
 
-
-    if (onSubmit && formData) {
-      onSubmit(formData);
+    if (loginUser && formData) {
+      loginUser(formData);
     }
-
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 3000);
   };
 
   return (
     <div className={className} {...props}>
-      <form onSubmit={handleSubmit} ref={formRef}>
+      <form onSubmit={handleFormSubmit} ref={formRef}>
         <div className="grid gap-2">
           <div className="grid gap-1">
             <Label className="sr-only" htmlFor="email">

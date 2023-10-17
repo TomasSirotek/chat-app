@@ -29,10 +29,10 @@ export class MesssageRepository {
           body: string,
           created_at: Date,
         }) => ({
-          chat_id: row.chat_id,
+          chatId: row.chat_id,
           senderId: row.sender_id,
           body: row.body,
-          created_at: row.created_at,
+          createdAt: row.created_at,
         })
       );
 
@@ -60,7 +60,7 @@ export class MesssageRepository {
         chatId: result.rows[0].chat_id,
         senderId: result.rows[0].sender_id,
         body: result.rows[0].body,
-        created_at: result.rows[0].created_at,
+        createdAt: result.rows[0].created_at,
       };
 
       return message;

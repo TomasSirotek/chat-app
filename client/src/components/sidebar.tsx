@@ -36,7 +36,6 @@ import {
   CommandList,
 } from "./ui/command";
 import { ChatContext } from "@/context/ChatContext";
-import PotentialChats from "@/pages/PotentialChats";
 import { PenSquare } from "lucide-react";
 import { getAbbreviatedDayOfWeek } from "@/helpers/dateHelper";
 import { Badge } from "./ui/badge";
@@ -48,8 +47,8 @@ interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
   isLoading: boolean;
   user: User | null;
   pChats: User[] | null | undefined;
-  createChat: (firstId: number, secondId: number) => void | undefined;
-  updateCurrChat: (chat: Chat) => void | undefined;
+  createChat: (firstId: number, secondId: number) => void
+  updateCurrChat: (chat: Chat) => void
 }
 
 export function Sidebar({
@@ -82,7 +81,7 @@ export function Sidebar({
   return (
     <div className={cn("pb-12", className)}>
       <div className="space-y-4 py-4">
-        <div className="px-3 py-4">
+        <div className="px-4 py-4">
           <div className="flex justify-center">
             <div>
               <h2 className=" px-4 text-lg font-semibold tracking-tight text-black dark:text-white">
@@ -113,7 +112,7 @@ export function Sidebar({
               <CommandEmpty>No users found.</CommandEmpty>
               <CommandGroup>
                 {chats?.map((chat, index) => (
-                  
+            
                   <CommandItem
                     key={index}
                     className={`${
