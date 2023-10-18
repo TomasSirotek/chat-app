@@ -15,6 +15,9 @@ import { Chat } from "@/models/Chat";
 import { Message } from "@/models/Message";
 import { io } from "socket.io-client";
 import { Notification } from "@/models/Notification";
+import { useLocation, useNavigate } from "react-router-dom";
+import useAxiosPrivate from "@/hooks/useAxiosPrivate";
+import useAuth from "@/hooks/useAuth";
 
 interface ChatContextValue {
   userChats: Chat[] | null;
@@ -26,17 +29,15 @@ interface ChatContextValue {
   isMsgSending: boolean | null;
   onlineUsers: User[];
   notification: Notification[];
-  
-  
+
   // FIX TYPES
   createMessage: (chatId: number, senderId: number, body: string) => void;
-  createChat: (firstId: number, secondId: number) => void ;
+  createChat: (firstId: number, secondId: number) => void;
   updateCurrChat: (chat: Chat) => void;
-  markThisUserNotificationsAsRead : any
+  markThisUserNotificationsAsRead: any;
 
   typingUsers: any;
-  startTyping : any;
-
+  startTyping: any;
 }
 
 export const ChatContext = createContext<ChatContextValue | undefined>(
@@ -45,10 +46,8 @@ export const ChatContext = createContext<ChatContextValue | undefined>(
 
 export const ChatContextProvider = ({
   children,
-  user,
 }: {
   children: ReactNode;
-  user: User | null;
 }) => {
   const [userChats, setUserChats] = useState<Chat[] | null>([]);
   const [isUserChatsLoading, setIsUserChatsLoading] = useState<boolean>(false);
@@ -67,9 +66,15 @@ export const ChatContextProvider = ({
 
   const [socket, setSocket] = useState<any | null>(null);
   const [notification, setNotification] = useState<Notification[]>([]);
-  
-  
- 
+
+  const axiosPrivate = useAxiosPrivate();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+
+  const { user } = useAuth() as any;
+
+  console.log(user)
 
   useEffect(() => {
     const nSocket = io("http://localhost:3000/");
@@ -96,8 +101,6 @@ export const ChatContextProvider = ({
       socket.off("getUsersOnline");
     };
   }, [socket]);
-
- 
 
   // send message to server
   useEffect(() => {
@@ -141,14 +144,13 @@ export const ChatContextProvider = ({
     };
   }, [socket, currChat]);
 
-
   const [typingUsers, setTypingUsers] = useState<string[]>([]);
- 
+
   const startTyping = () => {
     if (socket === null || !currChat) return;
     const recipientId = currChat.members.find((id) => id !== user?.id);
     if (recipientId) {
-      socket.emit('typing', {
+      socket.emit("typing", {
         isTyping: true,
         recipientId,
         chatId: currChat.id,
@@ -158,9 +160,9 @@ export const ChatContextProvider = ({
 
   useEffect(() => {
     let typingTimeout: NodeJS.Timeout | null = null;
-  
+
     if (socket === null || !currChat) return;
-  
+
     const handleUserTyping = (data: any) => {
       if (currChat.id === data.chatId) {
         const isTyping = data.isTyping;
@@ -170,16 +172,18 @@ export const ChatContextProvider = ({
               return [...prevTypingUsers, data.recipientId];
             }
           } else {
-            return prevTypingUsers.filter((userId) => userId !== data.recipientId);
+            return prevTypingUsers.filter(
+              (userId) => userId !== data.recipientId
+            );
           }
           return prevTypingUsers;
         });
-  
+
         // Clear the previous timeout (if any)
         if (typingTimeout) {
           clearTimeout(typingTimeout);
         }
-  
+
         // Set a new timeout to remove the user from typingUsers after 5 seconds
         typingTimeout = setTimeout(() => {
           setTypingUsers((prevTypingUsers) =>
@@ -188,62 +192,70 @@ export const ChatContextProvider = ({
         }, 1000);
       }
     };
-  
+
     socket.on("userTyping", handleUserTyping);
-  
+
     return () => {
       socket.off("userTyping", handleUserTyping);
     };
   }, [currChat, socket]);
- 
+
   useEffect(() => {
     const getUsers = async () => {
-      // geting all users
-      const response = await getRequest(`${environment.BASE_URL}/users`);
+      try {
+        const response = await axiosPrivate.get("/users");
 
-      // TODO: Better error handling
-      if (response.err) return console.log(response.msg);
+        const filteredUsers = response.data.filter((u: User) => {
+          if (user && user.id === u.id) {
+            return false; // Skip the logged-in user
+          }
 
-      const pChats = response.filter((u: User) => {
-        if (user && user.id === u.id) {
-          return false; // Skip the logged-in user
-        }
+          if (userChats) {
+            const isChatCreated = userChats.some((chat: any) =>
+              chat.members.includes(u.id)
+            );
 
-        if (userChats) {
-          const isChatCreated = userChats.some((chat : any) => {
-            return chat.members.includes(u.id);
-          });
+            return !isChatCreated;
+          }
 
-          return !isChatCreated;
-        }
+          return true; // If userChats is not available, include all users
+        });
 
-        return true; // If userChats is not available, include all users
-      });
+        setPotentialChats(filteredUsers);
+      } catch (error: any) {
+        showAlert(error.message, "warning");
 
-      setPotentialChats(pChats);
-    };
-
-    getUsers();
-  }, [userChats]);
-
-  useEffect(() => {
-    const getUserChats = async () => {
-      if (user?.id) {
-        setIsUserChatsLoading(true);
-
-        const response = await getRequest(
-          `${environment.BASE_URL}/chats/${user?.id}`
-        );
-
-        if (response.err) return setIsUserChatsLoading(false);
-
-        setUserChats(response);
-        setIsUserChatsLoading(false);
+        navigate("/login", { state: { from: location }, replace: true });
       }
     };
 
-    getUserChats();
-  }, [user,notification]);
+   // getUsers();
+
+    return () => {};
+  }, [userChats]);
+
+
+  useEffect(() => {
+    const getUserChats = async () => {
+      try {
+        if (user?.id) {
+          setIsUserChatsLoading(true);
+
+          const response = await axiosPrivate.get(`/chats/${user?.id}`);
+
+          console.log(response.data);
+          setUserChats(response.data);
+          console.log(userChats)
+          setIsUserChatsLoading(false);
+        }
+      } catch (error: any) {
+        showAlert(error.message, "warning");
+      }
+    };
+  //  getUserChats();
+  }, [user, notification]);
+
+
 
   useEffect(() => {
     if (!currChat) return;
@@ -260,7 +272,7 @@ export const ChatContextProvider = ({
       setMessagesLoading(false);
     };
 
-    getMessages();
+    //   getMessages();
   }, [currChat]);
 
   const updateCurrChat = useCallback((chat: Chat) => {
@@ -283,8 +295,6 @@ export const ChatContextProvider = ({
 
   const createMessage = useCallback(
     async (chatId: number, senderId: number, body: string) => {
-
-
       const response = await postRequest(
         `${environment.BASE_URL}/messages`,
         JSON.stringify({ chatId, senderId, body })
@@ -300,26 +310,32 @@ export const ChatContextProvider = ({
 
       setMessages((prevMessages: Message[]) => [
         ...(prevMessages ?? []),
-        response
+        response,
       ]);
     },
     []
   );
 
-  const markThisUserNotificationsAsRead = useCallback((thisUserNotifications : Notification[], notifications : Notification[]) => {
-    const updatedNotifications = notifications.map((notification: Notification) => {
-        const matchingNotification = thisUserNotifications.find((n: Notification) => n.senderId === notification.senderId);
+  const markThisUserNotificationsAsRead = useCallback(
+    (thisUserNotifications: Notification[], notifications: Notification[]) => {
+      const updatedNotifications = notifications.map(
+        (notification: Notification) => {
+          const matchingNotification = thisUserNotifications.find(
+            (n: Notification) => n.senderId === notification.senderId
+          );
 
-        if (matchingNotification) {
+          if (matchingNotification) {
             return { ...matchingNotification, isRead: true };
+          }
+
+          return notification;
         }
+      );
 
-        return notification;
-    });
-
-    setNotification(updatedNotifications);
-}, []);
-
+      setNotification(updatedNotifications);
+    },
+    []
+  );
 
   return (
     <ChatContext.Provider
@@ -338,7 +354,7 @@ export const ChatContextProvider = ({
         notification,
         markThisUserNotificationsAsRead,
         typingUsers,
-        startTyping
+        startTyping,
       }}
     >
       {children}

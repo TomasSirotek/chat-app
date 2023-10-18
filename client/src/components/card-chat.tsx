@@ -82,7 +82,10 @@ export function CardsChat({
   const [open, setOpen] = React.useState(false);
   const [selectedUsers, setSelectedUsers] = React.useState<User[]>([]);
 
+  // const { user } = useContext(AuthContext) || {};
   const { user } = useContext(AuthContext) || {};
+
+  console.log("user", user)
   const { recipientUser } = useFetchRecipientUser(currentChat, user ?? null);
 
   const {

@@ -3,9 +3,12 @@ import { Menu } from "@/components/menu";
 import { Sidebar } from "@/components/sidebar";
 // import { AuthContext } from "@/context/AuthContexts";
 import { ChatContext } from "@/context/ChatContext";
+import useAuth from "@/hooks/useAuth";
 import { useContext, useEffect, useState } from "react";
 
 const Chat = () => {
+
+
   const {
     userChats,
     isUserChatsLoading,
@@ -18,11 +21,13 @@ const Chat = () => {
 
   // const { user, logoutUser } = useContext(AuthContext) || {};
 
+  const {user} = useAuth() as any;
+
   return (
     <>
       <div className=" bg-background ">
         <div>
-          <Menu logoutUser={null || (() => {})} />
+          <Menu  />
           <div className="border-t ">
             <div className="grid lg:grid-cols-5 ">
               <Sidebar
@@ -31,7 +36,7 @@ const Chat = () => {
                 updateCurrChat={updateCurrChat || (() => {})} 
                 createChat={createChat || (() => {}) }
                 pChats={potentialChats || null}
-                user={null || null}
+                user={user || null}
                 className="hidden lg:block"
               />
               <div className="col-span-3 lg:col-span-4 lg:border-l">
@@ -50,6 +55,7 @@ const Chat = () => {
                 </div>
               </div>
             </div>
+
           </div>
         </div>
       </div>

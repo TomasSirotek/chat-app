@@ -1,3 +1,4 @@
+import axios from "@/api/axios";
 import { UserAuthForm } from "@/components/ui/user-auth-form";
 import { environment } from "@/environments/environment";
 import useAuth from "@/hooks/useAuth";
@@ -9,78 +10,81 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 const Login = () => {
-
-
-  const { setAuth, persist, setPersist } = useAuth() as any;
+  const { setLoggedUser, persist, setPersist } = useAuth() as any;
   const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from?.pathname || "/";
-  const {showAlert} = useAlert() as any;
-
+  const { showAlert } = useAlert() as any;
 
   const userRef = useRef();
   const errRef = useRef();
 
   const [user, setUser] = useState<User | null>(null);
-  const [pwd, setPwd] = useState('');
-  const [errMsg, setErrMsg] = useState('');
+  const [pwd, setPwd] = useState("");
+  const [errMsg, setErrMsg] = useState("");
 
-   const loginUser = useCallback(async (formData: FormData,persistLogin: boolean) => {
-      
-
-      const loginInfo = {
-      email: formData.get("email") || 'user@gmail.com',
+  const loginUser = useCallback(async (formData: FormData) => {
+    const loginInfo = {
+      email: formData.get("email") || "user@gmail.com",
       password: formData.get("password") || "React123456!",
     };
-    
-    setIsLoading(true);
 
+    setIsLoading(true);
 
     if (!loginInfo.email || !loginInfo.password) {
       showAlert("Please enter all fields", "warning");
       return;
     }
 
-    const res = await postRequest(
-      `${environment.BASE_URL}/auth/login`,
-      JSON.stringify(loginInfo)
-    );
+    try {
+      const res = await axios.post(
+        "/auth/login",
+        JSON.stringify({
+          email: loginInfo.email,
+          password: loginInfo.password,
+        }),
+        {
+          headers: { "Content-Type": "application/json" },
+          withCredentials: true,
+        }
+      );
 
-  
-    if (res.err) {
-      showAlert(res.msg, "warning"); // Show the error message
+      showAlert(`Successfully logged in ${loginInfo.email}`, "success");
+
+
+      const userData : User = {
+        id: res.data?.id,
+        username: res.data?.username,
+        email: res.data?.email,
+        password: res.data?.password,
+        createdAt: res.data?.createdAt,
+        accessToken: res.data?.accessToken,
+      };
+      console.log(userData)
+
+      setLoggedUser({ 
+        user: userData ,
+        accessToken: res.data?.accessToken,
+      });
+
       setIsLoading(false);
-      return;
-    }
-    showAlert(`Successfully logged in ${loginInfo.email}`, "success");
-
-    const accessToken = res?.accessToken;
-
-    const userData = {
-      id: res.id,
-      username: res.username,
-      email: res.email,
-      password: res.password,
-      createdAt: res.createdAt,
-      accessToken: accessToken
-    };
+      navigate(from, { replace: true });
     
-    setAuth({ userData });
-    setPersist(persistLogin)
- 
-    setIsLoading(false);
-    navigate(from, { replace: true });
+    } catch (error: any) {
+      showAlert(error.message, "warning"); // Show the error message
+      setIsLoading(false);
+    }
   }, []);
 
-  
+  const togglePersist = () => {
+    setPersist((prev: any) => !prev);
+  };
 
-useEffect(() => {
+  useEffect(() => {
     localStorage.setItem("persist", persist);
-}, [persist])
-
-
+  }, [persist]);
 
   return (
     <>
@@ -123,7 +127,11 @@ useEffect(() => {
                 Enter your email below to create your account
               </p>
             </div>
-            <UserAuthForm isLoading={isLoading} onSubmit={loginUser}  />
+            <UserAuthForm
+              isLoading={isLoading}
+              onSubmit={loginUser}
+              togglePersist={togglePersist}
+            />
             <p className="px-8 text-center text-sm text-muted-foreground">
               <Link href="/login" variant="body2">
                 Already have an account? Sign in

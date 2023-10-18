@@ -4,8 +4,8 @@ import { useContext, useDebugValue } from "react";
 
 
 const useAuth = () => {
-    const { auth } = useContext(AuthContext) as any;
-    useDebugValue(auth, auth => auth?.user ? "Logged In" : "Logged Out")
+    const { user } = useContext(AuthContext) as any;
+    useDebugValue(user, auth => auth?.user ? "Logged In" : "Logged Out")
     return useContext(AuthContext);
 }
 

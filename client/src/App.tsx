@@ -11,7 +11,7 @@ import Unauthorized from "./pages/Unauthorized";
 import useAuth from "./hooks/useAuth";
 
 function App() {
-  const { auth } = useAuth() as any;
+  
 
   return (
     <>
@@ -21,16 +21,16 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
 
-          <Route element={<PersistLogin />} />
-
-          <Route
-            path="/"
-            element={
-              <ChatContextProvider user={auth}>
-                <Chat />
-              </ChatContextProvider>
-            }
-          />
+          <Route element={<PersistLogin />}>
+            <Route
+              path="/"
+              element={
+                <ChatContextProvider>
+                  <Chat />
+                </ChatContextProvider>
+              }
+            />
+          </Route>
         </Route>
       </Routes>
     </>

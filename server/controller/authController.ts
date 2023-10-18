@@ -56,7 +56,7 @@ export default class AuthController {
         },
       },
       process.env.JWT_SECRET,
-      { expiresIn: "10s" }
+      { expiresIn: "60s" }
     );
 
     const refreshToken = jwt.sign(
@@ -150,8 +150,9 @@ export default class AuthController {
                     }
                 },
                 process.env.JWT_SECRET,
-                { expiresIn: '10s' }
+                { expiresIn: '60s' }
             );
+            console.log("refresh called")
             res.json({  accessToken })
         }
     );

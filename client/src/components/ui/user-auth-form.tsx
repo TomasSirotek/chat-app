@@ -12,33 +12,29 @@ import { Checkbox } from "./checkbox";
 
 interface UserAuthFormProps {
   className?: string;
-  onSubmit: (formData: FormData,persistLogin: boolean) => void; // Define onSubmit prop as a function
+  onSubmit: (formData: FormData) => void; // Define onSubmit prop as a function
   isLoading: boolean;
+  togglePersist: () => void;
 }
 
 export function UserAuthForm({
   className,
   onSubmit,
   isLoading,
+  togglePersist,
   ...props
 }: UserAuthFormProps) {
 
   const formRef = useRef<HTMLFormElement>(null);
-  const [persistLogin, setPersistLogin] = React.useState<boolean>(false);
 
   const handleFormSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = formRef.current ? new FormData(formRef.current) : undefined;
     if (formData) {
-      onSubmit(formData,persistLogin); // Call the parent's onSubmit function
+      onSubmit(formData); // Call the parent's onSubmit function
     }
   };
 
-
-
-  const handlePersistValue = () => {
-    setPersistLogin(!persistLogin);
-  }
 
  
   // const { isLoading, loginUser } = useContext(AuthContext) || {};
@@ -89,7 +85,7 @@ export function UserAuthForm({
             />
           </div>
           <div className="items-top flex space-x-2">
-      <Checkbox id="persist" onClick={handlePersistValue}/>
+      <Checkbox id="persist" onClick={togglePersist}/>
       <div className="grid gap-1.5 leading-none">
         <label
           htmlFor="persist"

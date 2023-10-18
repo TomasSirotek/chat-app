@@ -17,7 +17,7 @@ import {
 } from "./ui/menubar";
 import { UserNav } from "./user-nav";
 
-export function Menu({ logoutUser }: { logoutUser: () => void})  {
+export function Menu()  {
   return (
     <Menubar className="rounded-none border-b border-none flex h-12 items-center justify-between px-4">
       <MenubarMenu>
@@ -28,7 +28,7 @@ export function Menu({ logoutUser }: { logoutUser: () => void})  {
           <MenubarItem>About ChatApp</MenubarItem>
         </MenubarContent>
         <div className="ml-auto flex items-center space-x-4">
-          <UserNav logoutUser={logoutUser}/>
+          <UserNav />
           <ModeToggle />
         </div>
       </MenubarMenu>

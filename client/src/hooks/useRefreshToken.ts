@@ -1,26 +1,39 @@
-import { getRequest } from '@/utils/Service';
-
-import { environment } from '@/environments/environment';
+import { useEffect } from 'react';
+import axios from '../api/axios';
 import useAuth from './useAuth';
+import { User } from '@/models/User';
 
 const useRefreshToken = () => {
-    const { setAuth } = useAuth() as any;
+    const { setRefreshToken } = useAuth() as any;
+  
 
     const refresh = async () => {
-        const res = await getRequest( `${environment.BASE_URL}/auth/refresh`);
-       
-        console.log(res);
-        setAuth((prev: any) => {
+      try {
+        const response = await axios.get('/auth/refresh', {
+          withCredentials: true
+        });
+  
+        // Ensure the user is available before updating
+        setRefreshToken((prev: any) => {
             console.log(JSON.stringify(prev));
-            console.log(res.accessToken);
+            console.log(response.data.accessToken);
             return {
                 ...prev,
-                accessToken: res.accessToken
+                accessToken: response.data.accessToken
             }
         });
-        return res.accessToken;
-    }
+
+
+      return response.data.accessToken;
+  
+      } catch (error) {
+        console.error(error);
+        throw error;
+      }
+    };
+  
     return refresh;
-};
+  };
+  
 
 export default useRefreshToken;

@@ -1,3 +1,4 @@
+import { axiosPrivate } from "@/api/axios";
 import { environment } from "@/environments/environment";
 import { Chat } from "@/models/Chat";
 import { User } from "@/models/User";
@@ -15,13 +16,14 @@ export const useFetchRecipientUser = (chat: Chat | null, user: User | null) => {
     const getUserById = async () => {
       if (!recipientId) return null;
 
-      const response = await getRequest(
-        `${environment.BASE_URL}/users/${recipientId}`
-      );
+   
 
-      if (response.err) return setError(response.msg);
+      const response = await axiosPrivate.get(`/users/${user?.id}`);
+  
 
-      setRecipientUser(response);
+      if (response.data.err) return setError(response.data.message);
+
+      setRecipientUser(response.data);
       return null;
     };
 
@@ -42,20 +44,16 @@ export const useFetchRecipientUsers = (chats: Chat[], user: User) => {
         const chatIds = chats.map((chat) => chat.id);
 
         try {
-          // Call the new endpoint to fetch recipient users
-          const response = await getRequest(
-            `${environment.BASE_URL}/chats/recipient-users/${chatIds.join(",")}`
-          );
-
-          if (!response.err) {
-            // Filter out the current user's ID from the recipientUsers
-            const filteredRecipientUsers = response.filter(
+        
+          const response = await axiosPrivate.get(`/chats/recipient-users/${chatIds.join(",")}`);
+          
+          // Filter out the current user's ID from the recipientUsers
+            const filteredRecipientUsers = response.data.filter(
               (recipient: any) => recipient.id !== user.id
             );
             setRecipientUsers(filteredRecipientUsers);
-          }
-        } catch (error) {
-          console.error("Error fetching recipient users:", error);
+        } catch (error : any) {
+          console.error("Error fetching recipient users:", error.message);
         }
       }
     };

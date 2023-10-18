@@ -64,12 +64,13 @@ export function Sidebar({
 
   const recipientUsers = useFetchRecipientUsers(chats as Chat[], user as User);
 
-  const { onlineUsers, notification, markThisUserNotificationsAsRead } =
+  const { onlineUsers,notification, markThisUserNotificationsAsRead } =
     useContext(ChatContext) as any;
 
   const unreadNotifications = unreadNotificationsFunc(notification);
 
   const [open, setOpen] = useState(false);
+
   const { currChat } = useContext(ChatContext) || {};
 
   // const { latestMsg ,loading} = useFetchLatestMsg(chats as Chat[]);

@@ -1,8 +1,20 @@
+import { useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Button } from "./ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuTrigger } from "./ui/dropdown-menu";
+import useLogout from "@/hooks/useLogout";
 
-export function UserNav({ logoutUser }: { logoutUser: () => void}) {
+export function UserNav() {
+
+
+  const navigate = useNavigate();
+  const logout = useLogout();
+
+  const signOut = async () => {
+      await logout();
+      navigate('/login');
+  }
+
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -23,7 +35,7 @@ export function UserNav({ logoutUser }: { logoutUser: () => void}) {
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => logoutUser()}>
+          <DropdownMenuItem  onClick={signOut}>
             Log out
           </DropdownMenuItem>
         </DropdownMenuContent>
