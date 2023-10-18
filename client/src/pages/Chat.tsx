@@ -22,6 +22,8 @@ const Chat = () => {
     <>
       <div className=" bg-background ">
         <div>
+
+          
           <Menu logoutUser={logoutUser || (() => {})} />
           <div className="border-t ">
             <div className="grid lg:grid-cols-5 ">
