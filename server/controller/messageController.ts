@@ -3,7 +3,6 @@ import { autoInjectable } from "tsyringe";
 import ChatService from "../service/chatService";
 import { StatusCodes } from "http-status-codes";
 import { Chat, PostChatDto } from "../model/chat";
-import { authorization } from "./userController";
 import MessageService from "../service/messageService";
 import { Message } from "../model/message";
 
@@ -45,11 +44,11 @@ export default class MessageController {
     return res.status(StatusCodes.OK).json(existingMessages);
   }
   routes() {
-    router.post("/", authorization, (req: Request, res: Response) =>
+    router.post("/", (req: Request, res: Response) =>
       this.createMessage(req, res)
     );
 
-    router.get("/:id", authorization, (req: Request, res: Response) =>
+    router.get("/:id", (req: Request, res: Response) =>
       this.getCurrentMessagesOfChat(req, res)
     );
     return router;

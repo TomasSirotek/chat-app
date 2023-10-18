@@ -1,17 +1,11 @@
-import React from "react";
+import { Outlet } from "react-router-dom"
 
-type LayoutProps = {
-  children: React.ReactNode;
-};
+const Layout = () => {
+    return (
+        <main className="App">
+            <Outlet />
+        </main>
+    )
+}
 
-const Layout = ({ children }: LayoutProps) => {
-  return (
-    <>
-      <div className="min-h-screen">
-        <main>{children}</main>
-      </div>
-    </>
-  );
-};
-
-export default Layout;
+export default Layout

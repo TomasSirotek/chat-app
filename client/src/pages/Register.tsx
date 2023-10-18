@@ -7,11 +7,11 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { useContext } from "react";
-import { AuthContext } from "../context/AuthContexts";
+// import { AuthContext } from "../context/AuthContexts";
 import SaveIcon from "@mui/icons-material/Save";
 
 const Register = () => {
-  const { isLoading, registerUser } = useContext(AuthContext) || {};
+  // const { isLoading, registerUser } = useContext(AuthContext) || {};
 
   return (
     <>
@@ -33,7 +33,6 @@ const Register = () => {
           <Box
             component="form"
             noValidate
-            onSubmit={registerUser}
             sx={{ mt: 3 }}
           >
             <Grid container spacing={2}>

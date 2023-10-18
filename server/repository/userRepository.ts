@@ -3,6 +3,7 @@ import "reflect-metadata";
 const pgPoolWrapper = require(".././connection"); // import pgPoolWrapper
 
 export class UserRepository {
+ 
   constructor() {}
 
   async getAllUsersAsync(): Promise<User[] | undefined> {
@@ -17,6 +18,42 @@ export class UserRepository {
     } catch (error) {
       console.log(error);
     }
+  }
+
+  async getUserByRefreshToken(refreshToken: string): Promise<User | undefined>{
+    try {
+      const client = await pgPoolWrapper.connect();
+
+      const result = await client.query(
+        "SELECT * FROM chat_app.user WHERE refresh_token = $1 ",
+        [refreshToken]
+      );
+
+      client.release();
+
+      return result.rows.length > 0 ? result.rows[0] : null;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  async updateUserAsync(existingUser: User): Promise<User | undefined> {
+
+    try {
+      const client = await pgPoolWrapper.connect();
+
+      const result = await client.query(
+        "UPDATE chat_app.user SET refresh_token = $1 WHERE id = $2 RETURNING *",
+        [existingUser.refreshToken, existingUser.id]
+      );
+
+      client.release();
+
+      return result.rows.length > 0 ? result.rows[0] : null;
+    } catch (error) {
+      console.log(error);
+    }
+
+
   }
 
   async getUserByEmailAsync(email: string): Promise<User | undefined> {

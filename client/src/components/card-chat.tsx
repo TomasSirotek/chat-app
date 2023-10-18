@@ -30,7 +30,6 @@ import {
 } from "./ui/command";
 import { Chat } from "@/models/Chat";
 import { useFetchRecipientUser } from "@/hooks/useFetchRecipient";
-import { AuthContext } from "@/context/AuthContexts";
 import { useContext, useEffect } from "react";
 import { Message } from "@/models/Message";
 import { CheckCircle2, Settings, Trash } from "lucide-react";
@@ -39,6 +38,7 @@ import { ChatContext } from "@/context/ChatContext";
 import { SkeletonMsg } from "./empty-msg-skeleton";
 import Lottie from "lottie-react";
 import typing from "../animations/typing.json";
+import AuthContext from "@/context/AuthContexts";
 
 // Todo: Fix this so that it is not hardcoded and user can add to group chats
 // however this has to have another db table and also more logic in the backend as well as the front end

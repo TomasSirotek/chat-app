@@ -5,6 +5,7 @@ import { PostUserDto, User } from "../model/user";
 
 @autoInjectable()
 export default class UserService {
+   
     
     userRepository: UserRepository
 
@@ -14,6 +15,14 @@ export default class UserService {
 
     async createUserAsync(user: PostUserDto) : Promise<User | undefined>   {
         return this.userRepository.createUserAsync(user);
+    }
+
+    async updateUserAsync(existingUser: User) : Promise<User | undefined> {
+      return this.userRepository.updateUserAsync(existingUser);
+    }
+
+    async getUserByRefreshToken(refreshToken: any): Promise<User | undefined> {
+      return this.userRepository.getUserByRefreshToken(refreshToken);
     }
   
     async getAllUsersAsync():  Promise<User[] | undefined> {

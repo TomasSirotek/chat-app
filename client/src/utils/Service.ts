@@ -1,3 +1,5 @@
+import useAuth from "@/hooks/useAuth";
+import useRefreshToken from "@/hooks/useRefreshToken";
 import Cookies from "js-cookie";
 
 const ACCESS_TOKEN = "access_token";
@@ -31,18 +33,16 @@ export const postRequest = async (url: string, body: any) => {
 };
 
 export const getRequest = async (url: string) => {
-  const cookie = Cookies.get(ACCESS_TOKEN);
-
-  if (!cookie) return { err: true, msg: "No cookie found" };
+  
 
   const response = await fetch(url, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
       Accept: "*/*",
-      Cookie: cookie,
     },
     credentials: "include",
+    
   });
 
   const data = await response.json();

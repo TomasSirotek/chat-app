@@ -3,7 +3,6 @@ import { autoInjectable } from "tsyringe";
 import ChatService from "../service/chatService";
 import { StatusCodes } from "http-status-codes";
 import { Chat, PostChatDto } from "../model/chat";
-import { authorization } from "./userController";
 import { User } from "../model/user";
 
 const router = express.Router();
@@ -94,21 +93,20 @@ export default class ChatController {
   }
 
   routes() {
-    router.post("/", authorization, (req: Request, res: Response) =>
+    router.post("/", (req: Request, res: Response) =>
       this.createChat(req, res)
     );
 
-    router.get("/:userId", authorization, (req: Request, res: Response) =>
+    router.get("/:userId", (req: Request, res: Response) =>
       this.getUserChat(req, res)
     );
 
-    router.get("/recipient-users/:chatId", authorization, (req: Request, res: Response) =>
+    router.get("/recipient-users/:chatId", (req: Request, res: Response) =>
       this.getRecipients(req, res)
     );
 
     router.get(
       "/get/:firstId/:secondId",
-      authorization,
       (req: Request, res: Response) => this.getChatOfUsers(req, res)
     );
     return router;

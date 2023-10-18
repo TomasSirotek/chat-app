@@ -1,7 +1,87 @@
 import { UserAuthForm } from "@/components/ui/user-auth-form";
+import { environment } from "@/environments/environment";
+import useAuth from "@/hooks/useAuth";
+import { User } from "@/models/User";
+import { useAlert } from "@/providers/AlertProvider";
+import { postRequest } from "@/utils/Service";
 import Link from "@mui/material/Link";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const Login = () => {
+
+
+  const { setAuth, persist, setPersist } = useAuth() as any;
+  const [isLoading, setIsLoading] = useState(false);
+
+  const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from?.pathname || "/";
+  const {showAlert} = useAlert() as any;
+
+
+  const userRef = useRef();
+  const errRef = useRef();
+
+  const [user, setUser] = useState<User | null>(null);
+  const [pwd, setPwd] = useState('');
+  const [errMsg, setErrMsg] = useState('');
+
+   const loginUser = useCallback(async (formData: FormData,persistLogin: boolean) => {
+      
+
+      const loginInfo = {
+      email: formData.get("email") || 'user@gmail.com',
+      password: formData.get("password") || "React123456!",
+    };
+    
+    setIsLoading(true);
+
+
+    if (!loginInfo.email || !loginInfo.password) {
+      showAlert("Please enter all fields", "warning");
+      return;
+    }
+
+    const res = await postRequest(
+      `${environment.BASE_URL}/auth/login`,
+      JSON.stringify(loginInfo)
+    );
+
+  
+    if (res.err) {
+      showAlert(res.msg, "warning"); // Show the error message
+      setIsLoading(false);
+      return;
+    }
+    showAlert(`Successfully logged in ${loginInfo.email}`, "success");
+
+    const accessToken = res?.accessToken;
+
+    const userData = {
+      id: res.id,
+      username: res.username,
+      email: res.email,
+      password: res.password,
+      createdAt: res.createdAt,
+      accessToken: accessToken
+    };
+    
+    setAuth({ userData });
+    setPersist(persistLogin)
+ 
+    setIsLoading(false);
+    navigate(from, { replace: true });
+  }, []);
+
+  
+
+useEffect(() => {
+    localStorage.setItem("persist", persist);
+}, [persist])
+
+
+
   return (
     <>
       <div className="container min-h-screen relative flex-col items-center justify-center md:grid lg:max-w-none lg:grid-cols-2 lg:px-0">
@@ -43,7 +123,7 @@ const Login = () => {
                 Enter your email below to create your account
               </p>
             </div>
-            <UserAuthForm />
+            <UserAuthForm isLoading={isLoading} onSubmit={loginUser}  />
             <p className="px-8 text-center text-sm text-muted-foreground">
               <Link href="/login" variant="body2">
                 Already have an account? Sign in

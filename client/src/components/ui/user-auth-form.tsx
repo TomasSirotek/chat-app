@@ -5,32 +5,57 @@ import { Label } from "./label";
 import { Input } from "./input";
 import { Loader } from "lucide-react";
 
-import { FormEvent, useContext } from "react";
-import { AuthContext } from "@/context/AuthContexts";
+import { FormEvent, useContext, useRef } from "react";
+import { Checkbox } from "./checkbox";
+// import { AuthContext } from "@/context/AuthContexts";
 
-interface UserAuthFormProps
-  extends Omit<React.HTMLAttributes<HTMLDivElement>, "onSubmit"> {}
+
+interface UserAuthFormProps {
+  className?: string;
+  onSubmit: (formData: FormData,persistLogin: boolean) => void; // Define onSubmit prop as a function
+  isLoading: boolean;
+}
 
 export function UserAuthForm({
   className,
-
+  onSubmit,
+  isLoading,
   ...props
 }: UserAuthFormProps) {
-  const { isLoading, loginUser } = useContext(AuthContext) || {};
 
-  const formRef = React.useRef<HTMLFormElement | null>(null);
+  const formRef = useRef<HTMLFormElement>(null);
+  const [persistLogin, setPersistLogin] = React.useState<boolean>(false);
 
   const handleFormSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
-    const formData = formRef.current
-      ? new FormData(formRef.current)
-      : undefined;
-
-    if (loginUser && formData) {
-      loginUser(formData);
+    const formData = formRef.current ? new FormData(formRef.current) : undefined;
+    if (formData) {
+      onSubmit(formData,persistLogin); // Call the parent's onSubmit function
     }
   };
+
+
+
+  const handlePersistValue = () => {
+    setPersistLogin(!persistLogin);
+  }
+
+ 
+  // const { isLoading, loginUser } = useContext(AuthContext) || {};
+
+  // const formRef = React.useRef<HTMLFormElement | null>(null);
+
+  // const handleFormSubmit = (event: FormEvent<HTMLFormElement>) => {
+  //   event.preventDefault();
+
+  //   const formData = formRef.current
+  //     ? new FormData(formRef.current)
+  //     : undefined;
+
+  //   if (loginUser && formData) {
+  //     loginUser(formData);
+  //   }
+  // };
 
   return (
     <div className={className} {...props}>
@@ -63,6 +88,19 @@ export function UserAuthForm({
               disabled={isLoading}
             />
           </div>
+          <div className="items-top flex space-x-2">
+      <Checkbox id="persist" onClick={handlePersistValue}/>
+      <div className="grid gap-1.5 leading-none">
+        <label
+          htmlFor="persist"
+          className="text-sm text-muted-foreground leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+        >
+         Remember me
+        </label>
+        
+      </div>
+      
+      </div>
           <Button disabled={isLoading}>
             {isLoading && <Loader className="mr-2 h-4 w-4 animate-spin" />}
             Sign In with Email

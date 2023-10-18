@@ -1,7 +1,7 @@
 import { CardsChat } from "@/components/card-chat";
 import { Menu } from "@/components/menu";
 import { Sidebar } from "@/components/sidebar";
-import { AuthContext } from "@/context/AuthContexts";
+// import { AuthContext } from "@/context/AuthContexts";
 import { ChatContext } from "@/context/ChatContext";
 import { useContext, useEffect, useState } from "react";
 
@@ -16,13 +16,13 @@ const Chat = () => {
     updateCurrChat,
   } = useContext(ChatContext) || {};
 
-  const { user, logoutUser } = useContext(AuthContext) || {};
+  // const { user, logoutUser } = useContext(AuthContext) || {};
 
   return (
     <>
       <div className=" bg-background ">
         <div>
-          <Menu logoutUser={logoutUser || (() => {})} />
+          <Menu logoutUser={null || (() => {})} />
           <div className="border-t ">
             <div className="grid lg:grid-cols-5 ">
               <Sidebar
@@ -31,7 +31,7 @@ const Chat = () => {
                 updateCurrChat={updateCurrChat || (() => {})} 
                 createChat={createChat || (() => {}) }
                 pChats={potentialChats || null}
-                user={user || null}
+                user={null || null}
                 className="hidden lg:block"
               />
               <div className="col-span-3 lg:col-span-4 lg:border-l">
